@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "name": "Flutter (lib\\src\\presentation\\pages\\auth\\login\\bloc\\LoginBloc.dart)",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib\\src\\presentation\\pages\\auth\\login\\bloc\\LoginBloc.dart"
+        }
+    ]
+}
