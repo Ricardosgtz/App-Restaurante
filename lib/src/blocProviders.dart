@@ -34,8 +34,8 @@ List<BlocProvider> blocProviders = [
   BlocProvider<ClientCategoryListBloc>(create: (context) => ClientCategoryListBloc(locator<CategoriesUseCases>())),
   BlocProvider<ClientProductListBloc>(create: (context) => ClientProductListBloc(locator<ProductsUseCases>())),
   BlocProvider<ClientProductDetailBloc>(create: (context) => ClientProductDetailBloc(locator<ShoppingBagUseCases>())),
-  BlocProvider<ClientShoppingBagBloc>(create: (context) => ClientShoppingBagBloc(locator<ShoppingBagUseCases>(),locator<OrdersUseCases>(),)),
+  BlocProvider<ClientShoppingBagBloc>(create: (context) => ClientShoppingBagBloc(locator<ShoppingBagUseCases>(),locator<OrdersUseCases>(),locator<AuthUseCases>())),
   BlocProvider<ClientAddressCreateBloc>(create: (context) => ClientAddressCreateBloc(locator<AddressUseCases>(), locator<AuthUseCases>())..add(ClientAddressCreateInitEvent())),
   BlocProvider<ClientAddressListBloc>(create: (context) => ClientAddressListBloc(locator<AddressUseCases>(), locator<AuthUseCases>())),
-  BlocProvider<ClientShoppingBagBloc>(create: (context) => ClientShoppingBagBloc( locator<ShoppingBagUseCases>(),locator<OrdersUseCases>(),)),
+  BlocProvider<ClientShoppingBagBloc>(create: (context) => ClientShoppingBagBloc( locator<ShoppingBagUseCases>(),locator<OrdersUseCases>(),locator<AuthUseCases>())),
 ];

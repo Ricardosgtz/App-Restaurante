@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/src/domain/models/Address.dart';
+import 'package:flutter_application_1/src/data/dataSource/remote/services/OrdersServices.dart';
+import 'package:flutter_application_1/src/domain/models/Address.dart' as addr;
+import 'package:flutter_application_1/src/domain/models/Order.dart';
+import 'package:flutter_application_1/src/domain/utils/Resource.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/ClientShoppingBagBottomBar.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/ClientShoppingBagItem.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagBloc.dart';
@@ -20,8 +23,9 @@ class _ClientShoppingBagPageState extends State<ClientShoppingBagPage> {
   ClientShoppingBagBloc? _bloc;
   String selectedOrderType = 'sitio';
   int? selectedAddressId;
-  Address? selectedAddress;
-  
+  addr.Address? selectedAddress;
+  String? noteText;
+  bool _isLoading = false; // 🟢 Control del loading
 
   @override
   void initState() {
@@ -37,15 +41,30 @@ class _ClientShoppingBagPageState extends State<ClientShoppingBagPage> {
     _bloc = BlocProvider.of<ClientShoppingBagBloc>(context);
     return Scaffold(
       appBar: HomeAppBar(title: 'Mi Orden'),
-      body: BlocBuilder<ClientShoppingBagBloc, ClientShoppingBagState>(
-        builder: (context, state) {
-          return ListView.builder(
-            itemCount: state.products.length,
-            itemBuilder: (context, index) {
-              return ClientShoppingBagItem(_bloc, state, state.products[index]);
+      body: Stack(
+        children: [
+          BlocBuilder<ClientShoppingBagBloc, ClientShoppingBagState>(
+            builder: (context, state) {
+              return ListView.builder(
+                itemCount: state.products.length,
+                itemBuilder: (context, index) {
+                  return ClientShoppingBagItem(_bloc, state, state.products[index]);
+                },
+              );
             },
-          );
-        },
+          ),
+          // 🌀 Overlay del loading
+          if (_isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.4),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 4,
+                ),
+              ),
+            ),
+        ],
       ),
       bottomNavigationBar: BlocBuilder<ClientShoppingBagBloc, ClientShoppingBagState>(
         builder: (context, state) {
@@ -61,7 +80,6 @@ class _ClientShoppingBagPageState extends State<ClientShoppingBagPage> {
   }
 
   void _confirmOrder(BuildContext context, ClientShoppingBagState state) {
-    // Validar que haya productos
     if (state.products.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Debes agregar al menos un producto')),
@@ -69,7 +87,6 @@ class _ClientShoppingBagPageState extends State<ClientShoppingBagPage> {
       return;
     }
 
-    // Mostrar el modal
     showOrderTypeModal(
       context,
       selectedAddress,
@@ -81,30 +98,70 @@ class _ClientShoppingBagPageState extends State<ClientShoppingBagPage> {
       onAddressSelected: (id) {
         setState(() => selectedAddressId = id);
       },
+      onAddressObjectSelected: (addr.Address? address) {
+        setState(() => selectedAddress = address);
+      },
+      onNoteChanged: (note) {
+        setState(() => noteText = note);
+      },
       onConfirm: () => _createOrder(context, state),
     );
   }
 
-  void _createOrder(BuildContext context, ClientShoppingBagState state) {
-    // Preparar items para enviar
-    List<Map<String, dynamic>> items = state.products.map((product) {
-      return {
-        'product_id': product.id,
-        'quantity': product.quantity,
-        'unit_price': product.price,
-      };
-    }).toList();
+  Future<void> _createOrder(BuildContext context, ClientShoppingBagState state) async {
+    setState(() => _isLoading = true); // ⏳ Mostrar loading
 
-    // Navegar a confirmación con los datos
-    Navigator.pushNamed(
-      context,
-      'client/order/confirmation',
-      arguments: {
-        'orderType': selectedOrderType,
-        'addressId': selectedAddressId,
-        'items': items,
-        'total': state.total,
-      },
-    );
+    try {
+      final authResponse = await _bloc!.authUseCases.getUserSession.run();
+      final clientId = authResponse!.cliente.id!;
+      final token = authResponse.token;
+
+      final ordersService = OrdersService(Future.value(token));
+
+      List<Map<String, dynamic>> items = state.products.map((product) {
+        return {
+          'product_id': product.id,
+          'quantity': product.quantity,
+          'unit_price': product.price,
+        };
+      }).toList();
+
+      final response = await ordersService.createOrder(
+        clientId: clientId,
+        restaurantId: 1,
+        statusId: 1,
+        addressId: selectedAddressId,
+        orderType: selectedOrderType,
+        note: noteText,
+        items: items,
+      );
+
+      setState(() => _isLoading = false); // ⏹️ Ocultar loading
+
+      if (response is Success<Order>) {
+        final order = (response as Success<Order>).data;
+
+        _bloc?.add(ClearShoppingBag());
+
+        Navigator.pushNamed(
+          context,
+          'client/order/confirmation',
+          arguments: order,
+        );
+      } else if (response is Error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al crear orden: ${(response as Error).message}')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error desconocido al crear la orden')),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error inesperado: $e')),
+      );
+    }
   }
 }

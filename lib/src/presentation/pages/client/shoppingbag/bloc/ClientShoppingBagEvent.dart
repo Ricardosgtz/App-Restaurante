@@ -36,6 +36,8 @@ class GetTotal extends ClientShoppingBagEvent {
   const GetTotal();
 }
 
+class ClearShoppingBag extends ClientShoppingBagEvent {}
+
 class ConfirmOrder extends ClientShoppingBagEvent {
   final int clientId;
   final int restaurantId;

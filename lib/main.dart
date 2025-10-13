@@ -6,6 +6,7 @@ import 'package:flutter_application_1/src/presentation/pages/auth/register/Regis
 import 'package:flutter_application_1/src/presentation/pages/client/address/create/ClientAddressCreatePage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/address/list/ClientAddressListPage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/home/ClientHomePage.dart';
+import 'package:flutter_application_1/src/presentation/pages/client/order/confirmation/ClientOrderConfirmationPage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/product/detail/ClientProductDetailPage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/product/list/ClientProductListPage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/ClientShoppingBagPage.dart';
@@ -13,10 +14,15 @@ import 'package:flutter_application_1/src/presentation/pages/profile/info/Profil
 import 'package:flutter_application_1/src/presentation/pages/profile/update/ProfileUpdatePage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
+
+  await initializeDateFormatting('es_MX', null);
+
+
   runApp(const MyApp());
 }
 
@@ -49,6 +55,7 @@ class MyApp extends StatelessWidget {
           'client/shopping_bag': (BuildContext context) => ClientShoppingBagPage(),
           'client/address/list': (BuildContext context) => ClientAddressListPage(),
           'client/address/create': (BuildContext context) => ClientAddressCreatePage(),
+          'client/order/confirmation': (context) => const ClientOrderConfirmationPage(),
         },
       ),
     );

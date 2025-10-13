@@ -70,7 +70,7 @@ class OrdersService {
     required List<Map<String, dynamic>> items,
   }) async {
     try {
-      Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/orders/');
+      Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/orders');
       Map<String, String> headers = {
         "Content-Type": "application/json",
         "Authorization": await token

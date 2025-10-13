@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_application_1/src/domain/models/Product.dart';
 
+
 List<Order> orderFromJson(String str) => List<Order>.from(json.decode(str).map((x) => Order.fromJson(x)));
 
 String orderToJson(List<Order> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
@@ -56,12 +57,14 @@ class Order {
 class Client {
     int id;
     String name;
+    String? lastname;
     String? email;
     String? phone;
 
     Client({
         required this.id,
         required this.name,
+        this.lastname,
         this.email,
         this.phone,
     });
@@ -69,6 +72,7 @@ class Client {
     factory Client.fromJson(Map<String, dynamic> json) => Client(
         id: json["id"],
         name: json["name"],
+        lastname: json["lastname"],
         email: json["email"],
         phone: json["phone"],
     );
@@ -76,6 +80,7 @@ class Client {
     Map<String, dynamic> toJson() => {
         "id": id,
         "name": name,
+        "lasname": lastname,
         "email": email,
         "phone": phone,
     };
