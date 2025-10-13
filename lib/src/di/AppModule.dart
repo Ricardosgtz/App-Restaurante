@@ -1,5 +1,6 @@
 import 'package:flutter_application_1/src/data/dataSource/local/SharedPref.dart';
 import 'package:flutter_application_1/src/data/dataSource/remote/services/CategoriesService.dart';
+import 'package:flutter_application_1/src/data/dataSource/remote/services/OrdersServices.dart';
 import 'package:flutter_application_1/src/data/dataSource/remote/services/ProductsService.dart';
 import 'package:flutter_application_1/src/data/dataSource/remote/services/AddressServices.dart';
 import 'package:flutter_application_1/src/data/dataSource/remote/services/UsersService.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_application_1/src/data/repository/AddressRepositoryImpl.
 import 'package:flutter_application_1/src/data/repository/AuthRepositoryImpl.dart';
 import 'package:flutter_application_1/src/data/dataSource/remote/services/AuthService.dart';
 import 'package:flutter_application_1/src/data/repository/CategoriesRepositoryImpl.dart';
+import 'package:flutter_application_1/src/data/repository/OrdersRepositoryImpl.dart';
 import 'package:flutter_application_1/src/data/repository/ProductsRepositoryImpl.dart';
 import 'package:flutter_application_1/src/data/repository/ShoppingBagRepositoryImpl.dart';
 import 'package:flutter_application_1/src/data/repository/UsersRepositoryImpl.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_application_1/src/domain/models/AuthResponse.dart';
 import 'package:flutter_application_1/src/domain/repository/AddressRepository.dart';
 import 'package:flutter_application_1/src/domain/repository/AuthRepository.dart';
 import 'package:flutter_application_1/src/domain/repository/CategoriesRepository.dart';
+import 'package:flutter_application_1/src/domain/repository/OrdersRepository.dart';
 import 'package:flutter_application_1/src/domain/repository/ProductsRepository.dart';
 import 'package:flutter_application_1/src/domain/repository/ShoppingBagRepository.dart';
 import 'package:flutter_application_1/src/domain/repository/UsersRepository.dart';
@@ -38,6 +41,10 @@ import 'package:flutter_application_1/src/domain/useCases/auth/RegisterUseCase.d
 import 'package:flutter_application_1/src/domain/useCases/auth/SaveUserSessionUseCase.dart';
 import 'package:flutter_application_1/src/domain/useCases/categories/CategoriesUseCases.dart';
 import 'package:flutter_application_1/src/domain/useCases/categories/GetCategoriesUseCase.dart';
+import 'package:flutter_application_1/src/domain/useCases/oreder/CreateOrderUseCase.dart';
+import 'package:flutter_application_1/src/domain/useCases/oreder/GetOrderDetailUseCase.dart';
+import 'package:flutter_application_1/src/domain/useCases/oreder/GetOrdersByClientUseCase.dart';
+import 'package:flutter_application_1/src/domain/useCases/oreder/OrdersUseCases.dart';
 import 'package:flutter_application_1/src/domain/useCases/products/GetProductsByCategoryUseCase.dart';
 import 'package:flutter_application_1/src/domain/useCases/products/ProductsUseCases.dart';
 import 'package:flutter_application_1/src/domain/useCases/users/UpdateUsersUseCases.dart';
@@ -69,6 +76,8 @@ abstract class AppModule {
   @injectable
   AddressServices get addressService => AddressServices(token);
   @injectable
+  OrdersService get ordersService => OrdersService(token);
+  @injectable
   SharedPref get sharedPref => SharedPref(); //podremos ingestar el este objeto donde queramos
   @injectable
   AuthRepository get authRepository => AuthRepositoryImpl(authService, sharedPref);
@@ -82,6 +91,8 @@ abstract class AppModule {
   ShoppingBagRepository get shoppingBagRepository => ShoppingBagRepositoryImpl(sharedPref);
   @injectable
   AddressRepository get addressRepository => AddressRepositoryImpl(addressService, sharedPref);
+  @injectable
+  OrdersRepository get ordersRepository => OrdersRepositoryImpl(ordersService);
 
   @injectable
   AuthUseCases get authUserCases => AuthUseCases(
@@ -123,6 +134,13 @@ abstract class AppModule {
     getAddressSession: GetAddressSessionUseCase(addressRepository),
     delete: DeleteAddressUseCase(addressRepository),
     deleteFromSession: DeleteAddressFromSessionUseCase(addressRepository)
+  );
+
+  @injectable
+  OrdersUseCases get ordersUseCases => OrdersUseCases(
+    getOrdersByClient: GetOrdersByClientUseCase(ordersRepository),
+    getOrderDetail: GetOrderDetailUseCase(ordersRepository),
+    createOrder: CreateOrderUseCase(ordersRepository),
   );
 
 

@@ -11,156 +11,200 @@ String orderToJson(List<Order> data) => json.encode(List<dynamic>.from(data.map(
 class Order {
     int id;
     Client client;
-    Address address;
+    Restaurant restaurant;
+    OrderInfo order;
+    Address? address;
     Status status;
-    String orderType;
-    String note;
+    List<OrderDetail> orderdetails;
+    double total;
     DateTime createdAt;
-    List<Detail> details;
 
     Order({
         required this.id,
         required this.client,
-        required this.address,
+        required this.restaurant,
+        required this.order,
+        this.address,
         required this.status,
-        required this.orderType,
-        required this.note,
+        required this.orderdetails,
+        required this.total,
         required this.createdAt,
-        required this.details,
     });
 
     factory Order.fromJson(Map<String, dynamic> json) => Order(
         id: json["id"],
         client: Client.fromJson(json["client"]),
-        address: Address.fromJson(json["address"]),
+        restaurant: Restaurant.fromJson(json["restaurant"]),
+        order: OrderInfo.fromJson(json["order"]),
+        address: json["address"] != null ? Address.fromJson(json["address"]) : null,
         status: Status.fromJson(json["status"]),
-        orderType: json["order_type"],
-        note: json["note"],
+        orderdetails: List<OrderDetail>.from(json["orderdetails"].map((x) => OrderDetail.fromJson(x))),
+        total: double.parse(json["total"].toString()),
         createdAt: DateTime.parse(json["created_at"]),
-        details: List<Detail>.from(json["details"].map((x) => Detail.fromJson(x))),
     );
 
     Map<String, dynamic> toJson() => {
         "id": id,
         "client": client.toJson(),
-        "address": address.toJson(),
+        "restaurant": restaurant.toJson(),
+        "order": order.toJson(),
+        "address": address?.toJson(),
         "status": status.toJson(),
-        "order_type": orderType,
-        "note": note,
+        "orderdetails": List<dynamic>.from(orderdetails.map((x) => x.toJson())),
+        "total": total,
         "created_at": createdAt.toIso8601String(),
-        "details": List<dynamic>.from(details.map((x) => x.toJson())),
-    };
-}
-
-class Address {
-    int id;
-    int idClient;
-    String alias;
-    String address;
-    String reference;
-    DateTime createdAt;
-    DateTime updatedAt;
-
-    Address({
-        required this.id,
-        required this.idClient,
-        required this.alias,
-        required this.address,
-        required this.reference,
-        required this.createdAt,
-        required this.updatedAt,
-    });
-
-    factory Address.fromJson(Map<String, dynamic> json) => Address(
-        id: json["id"],
-        idClient: json["id_client"],
-        alias: json["alias"],
-        address: json["address"],
-        reference: json["reference"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
-    );
-
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "id_client": idClient,
-        "alias": alias,
-        "address": address,
-        "reference": reference,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
     };
 }
 
 class Client {
     int id;
     String name;
-    String lastname;
-    String email;
-    String phone;
-    String image;
+    String? email;
+    String? phone;
 
     Client({
         required this.id,
         required this.name,
-        required this.lastname,
-        required this.email,
-        required this.phone,
-        required this.image,
+        this.email,
+        this.phone,
     });
 
     factory Client.fromJson(Map<String, dynamic> json) => Client(
         id: json["id"],
         name: json["name"],
-        lastname: json["lastname"],
         email: json["email"],
         phone: json["phone"],
-        image: json["image"],
     );
 
     Map<String, dynamic> toJson() => {
         "id": id,
         "name": name,
-        "lastname": lastname,
         "email": email,
         "phone": phone,
-        "image": image,
     };
 }
 
-class Detail {
-    Product product;
-    int quantity;
-    String unitPrice;
-    int lineTotal;
-    DateTime createdAt;
-    DateTime updatedAt;
+class Restaurant {
+    int id;
+    String name;
 
-    Detail({
-        required this.product,
-        required this.quantity,
-        required this.unitPrice,
-        required this.lineTotal,
-        required this.createdAt,
-        required this.updatedAt,
+    Restaurant({
+        required this.id,
+        required this.name,
     });
 
-    factory Detail.fromJson(Map<String, dynamic> json) => Detail(
-        product: Product.fromJson(json["product"]),
-        quantity: json["quantity"],
-        unitPrice: json["unit_price"],
-        lineTotal: json["line_total"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
+    factory Restaurant.fromJson(Map<String, dynamic> json) => Restaurant(
+        id: json["id"],
+        name: json["name"],
     );
 
     Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+    };
+}
+
+class OrderInfo {
+    String type;
+    String? note;
+
+    OrderInfo({
+        required this.type,
+        this.note,
+    });
+
+    factory OrderInfo.fromJson(Map<String, dynamic> json) => OrderInfo(
+        type: json["type"],
+        note: json["note"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "type": type,
+        "note": note,
+    };
+}
+
+class Address {
+    int? id;
+    String? alias;
+    String address;
+    String? reference;
+
+    Address({
+        this.id,
+        this.alias,
+        required this.address,
+        this.reference,
+    });
+
+    factory Address.fromJson(Map<String, dynamic> json) => Address(
+        id: json["id"],
+        alias: json["alias"],
+        address: json["address"],
+        reference: json["reference"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "id": id,
+        "alias": alias,
+        "address": address,
+        "reference": reference,
+    };
+}
+
+class Status {
+    int id;
+    String name;
+    String description;
+
+    Status({
+        required this.id,
+        required this.name,
+        required this.description,
+    });
+
+    factory Status.fromJson(Map<String, dynamic> json) => Status(
+        id: json["id"],
+        name: json["name"],
+        description: json["description"],
+    );
+
+    Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "description": description,
+    };
+}
+
+class OrderDetail {
+    int productId;
+    Product product;
+    int quantity;
+    String unitPrice;
+    double subtotal;
+
+    OrderDetail({
+        required this.productId,
+        required this.product,
+        required this.quantity,
+        required this.unitPrice,
+        required this.subtotal,
+    });
+
+    factory OrderDetail.fromJson(Map<String, dynamic> json) => OrderDetail(
+        productId: json["product_id"],
+        product: Product.fromJson(json["product"]),
+        quantity: json["quantity"],
+        unitPrice: json["unit_price"],
+        subtotal: double.parse(json["subtotal"].toString()),
+    );
+
+    Map<String, dynamic> toJson() => {
+        "product_id": productId,
         "product": product.toJson(),
         "quantity": quantity,
         "unit_price": unitPrice,
-        "line_total": lineTotal,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
+        "subtotal": subtotal,
     };
 }
 
@@ -199,7 +243,7 @@ class Product {
         image2: json["image2"],
         createdAt: DateTime.parse(json["created_at"]),
         updatedAt: DateTime.parse(json["updated_at"]),
-        available: json["available"],
+        available: json["available"] ?? true,
     );
 
     Map<String, dynamic> toJson() => {
@@ -213,29 +257,5 @@ class Product {
         "created_at": createdAt.toIso8601String(),
         "updated_at": updatedAt.toIso8601String(),
         "available": available,
-    };
-}
-
-class Status {
-    int id;
-    String name;
-    String description;
-
-    Status({
-        required this.id,
-        required this.name,
-        required this.description,
-    });
-
-    factory Status.fromJson(Map<String, dynamic> json) => Status(
-        id: json["id"],
-        name: json["name"],
-        description: json["description"],
-    );
-
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "description": description,
     };
 }
