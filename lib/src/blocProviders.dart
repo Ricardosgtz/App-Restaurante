@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/injection.dart';
 import 'package:flutter_application_1/src/domain/useCases/address/AddressUseCases.dart';
 import 'package:flutter_application_1/src/domain/useCases/auth/AuthUseCases.dart';
+import 'package:flutter_application_1/src/domain/useCases/oreder/OrdersUseCases.dart';
 import 'package:flutter_application_1/src/presentation/pages/auth/login/bloc/LoginBloc.dart';
 import 'package:flutter_application_1/src/presentation/pages/auth/login/bloc/LoginEvent.dart';
 import 'package:flutter_application_1/src/presentation/pages/auth/register/bloc/RegisterBloc.dart';
@@ -33,8 +34,8 @@ List<BlocProvider> blocProviders = [
   BlocProvider<ClientCategoryListBloc>(create: (context) => ClientCategoryListBloc(locator<CategoriesUseCases>())),
   BlocProvider<ClientProductListBloc>(create: (context) => ClientProductListBloc(locator<ProductsUseCases>())),
   BlocProvider<ClientProductDetailBloc>(create: (context) => ClientProductDetailBloc(locator<ShoppingBagUseCases>())),
-  BlocProvider<ClientShoppingBagBloc>(create: (context) => ClientShoppingBagBloc(locator<ShoppingBagUseCases>())),
+  BlocProvider<ClientShoppingBagBloc>(create: (context) => ClientShoppingBagBloc(locator<ShoppingBagUseCases>(),locator<OrdersUseCases>(),)),
   BlocProvider<ClientAddressCreateBloc>(create: (context) => ClientAddressCreateBloc(locator<AddressUseCases>(), locator<AuthUseCases>())..add(ClientAddressCreateInitEvent())),
   BlocProvider<ClientAddressListBloc>(create: (context) => ClientAddressListBloc(locator<AddressUseCases>(), locator<AuthUseCases>())),
-
+  BlocProvider<ClientShoppingBagBloc>(create: (context) => ClientShoppingBagBloc( locator<ShoppingBagUseCases>(),locator<OrdersUseCases>(),)),
 ];

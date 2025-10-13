@@ -1,8 +1,5 @@
-// To parse this JSON data, do
-//
-//     final order = orderFromJson(jsonString);
-
 import 'dart:convert';
+import 'package:flutter_application_1/src/domain/models/Product.dart';
 
 List<Order> orderFromJson(String str) => List<Order>.from(json.decode(str).map((x) => Order.fromJson(x)));
 
@@ -205,57 +202,5 @@ class OrderDetail {
         "quantity": quantity,
         "unit_price": unitPrice,
         "subtotal": subtotal,
-    };
-}
-
-class Product {
-    int id;
-    int idCategory;
-    String name;
-    String description;
-    String price;
-    String image1;
-    String image2;
-    DateTime createdAt;
-    DateTime updatedAt;
-    bool available;
-
-    Product({
-        required this.id,
-        required this.idCategory,
-        required this.name,
-        required this.description,
-        required this.price,
-        required this.image1,
-        required this.image2,
-        required this.createdAt,
-        required this.updatedAt,
-        required this.available,
-    });
-
-    factory Product.fromJson(Map<String, dynamic> json) => Product(
-        id: json["id"],
-        idCategory: json["id_category"],
-        name: json["name"],
-        description: json["description"],
-        price: json["price"],
-        image1: json["image1"],
-        image2: json["image2"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
-        available: json["available"] ?? true,
-    );
-
-    Map<String, dynamic> toJson() => {
-        "id": id,
-        "id_category": idCategory,
-        "name": name,
-        "description": description,
-        "price": price,
-        "image1": image1,
-        "image2": image2,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-        "available": available,
     };
 }

@@ -6,8 +6,17 @@ import 'package:google_fonts/google_fonts.dart';
 
 class ClientShoppingBagBottomBar extends StatelessWidget {
   final ClientShoppingBagState state;
+  final String selectedOrderType;
+  final int? selectedAddressId;
+  final VoidCallback onConfirmOrder;
 
-  const ClientShoppingBagBottomBar(this.state, {super.key});
+  const ClientShoppingBagBottomBar(
+    this.state, {
+    required this.selectedOrderType,
+    this.selectedAddressId,
+    required this.onConfirmOrder,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +44,7 @@ class ClientShoppingBagBottomBar extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // 🔹 Indicador superior decorativo
+          // Indicador superior decorativo
           Container(
             height: 5,
             width: 60,
@@ -46,11 +55,11 @@ class ClientShoppingBagBottomBar extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // 🔹 Fila Total + Botón
+          // Fila Total + Botón
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // 💰 Sección de total
+              // Sección de total
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -88,14 +97,12 @@ class ClientShoppingBagBottomBar extends StatelessWidget {
                 ),
               ),
 
-              // 🛒 Botón Confirmar Orden
+              // Botón Confirmar Orden
               SizedBox(
                 width: 180,
                 height: 50,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pushNamed(context, 'client/address/list');
-                  },
+                  onPressed: onConfirmOrder,
                   label: Text(
                     'Confirmar Orden',
                     style: GoogleFonts.poppins(

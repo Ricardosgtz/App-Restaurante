@@ -6,69 +6,72 @@ import 'package:flutter_application_1/src/domain/utils/Resource.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/address/list/bloc/ClientAddressListEvent.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/address/list/bloc/ClientAddressListState.dart';
 
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
-class ClientAddressListBloc extends Bloc<ClientAddressListEvent, ClientAddressListState> {
-
+class ClientAddressListBloc
+    extends Bloc<ClientAddressListEvent, ClientAddressListState> {
   AddressUseCases addressUseCases;
   AuthUseCases authUseCases;
 
-  ClientAddressListBloc(this.addressUseCases, this.authUseCases): super(ClientAddressListState()) {
+  ClientAddressListBloc(this.addressUseCases, this.authUseCases)
+    : super(ClientAddressListState()) {
     on<GetUserAddress>(_onGetUserAddress);
     on<ChangeRadioValue>(_onChangeRadioValue);
     on<SetAddressSession>(_onSetAddressSession);
-    on<DeleteAddress>(_onDeleteAddress);  
- 
-  } 
+    on<DeleteAddress>(_onDeleteAddress);
+  }
 
-  Future<void> _onGetUserAddress(GetUserAddress event, Emitter<ClientAddressListState> emit) async {
+  Future<void> _onGetUserAddress(
+    GetUserAddress event,
+    Emitter<ClientAddressListState> emit,
+  ) async {
     AuthResponse? authResponse = await authUseCases.getUserSession.run();
     if (authResponse != null) {
-      emit(
-        state.copyWith(
-          response: Loading()
-        )
+      emit(state.copyWith(response: Loading()));
+      Resource response = await addressUseCases.getUserAddress.run(
+        authResponse.cliente.id!,
       );
-      Resource response = await addressUseCases.getUserAddress.run(authResponse.cliente.id!);
-      emit(
-        state.copyWith(
-          response: response
-        )
-      );
-    }   
+      emit(state.copyWith(response: response));
+    }
   }
 
-    Future<void> _onChangeRadioValue(ChangeRadioValue event, Emitter<ClientAddressListState> emit) async {
+  Future<void> _onChangeRadioValue(
+    ChangeRadioValue event,
+    Emitter<ClientAddressListState> emit,
+  ) async {
     emit(
-      state.copyWith(radioValue: event.radioValue)
+      state.copyWith(
+        radioValue: event.radioValue,
+        addressSelected: event.address, // ✅ nuevo campo
+      ),
     );
-    await addressUseCases.saveAddressInSession.run(event.address); 
+
+    await addressUseCases.saveAddressInSession.run(event.address);
   }
 
-    Future<void> _onSetAddressSession(SetAddressSession event, Emitter<ClientAddressListState> emit) async {
+  Future<void> _onSetAddressSession(
+    SetAddressSession event,
+    Emitter<ClientAddressListState> emit,
+  ) async {
     Address? addressSession = await addressUseCases.getAddressSession.run();
     if (addressSession != null) {
-      int index = event.addressList.indexWhere((address) => address.id == addressSession.id);
-      if (index != -1) { // YA HEMOS SELECCIONADO UNA DIRECCION Y ESTA GUARDADA EN SESION
+      int index = event.addressList.indexWhere(
+        (address) => address.id == addressSession.id,
+      );
+      if (index != -1) {
+        // YA HEMOS SELECCIONADO UNA DIRECCION Y ESTA GUARDADA EN SESION
         emit(state.copyWith(radioValue: index));
       }
     }
   }
 
-    Future<void> _onDeleteAddress(DeleteAddress event, Emitter<ClientAddressListState> emit) async {
-    emit(
-      state.copyWith(
-        response: Loading()
-      )
-    );
+  Future<void> _onDeleteAddress(
+    DeleteAddress event,
+    Emitter<ClientAddressListState> emit,
+  ) async {
+    emit(state.copyWith(response: Loading()));
     Resource response = await addressUseCases.delete.run(event.id);
-    emit(
-      state.copyWith(
-        response: response
-      )
-    );
+    emit(state.copyWith(response: response));
     Address? addressSession = await addressUseCases.getAddressSession.run();
     if (addressSession != null) {
       if (addressSession.id == event.id) {
@@ -76,7 +79,5 @@ class ClientAddressListBloc extends Bloc<ClientAddressListEvent, ClientAddressLi
         emit(state.copyWith(radioValue: null));
       }
     }
-    
   }
-
 }

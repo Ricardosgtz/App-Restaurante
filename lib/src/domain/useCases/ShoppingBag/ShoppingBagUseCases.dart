@@ -19,7 +19,4 @@ class ShoppingBagUseCases {
     required this.deleteShoppingBag,
     required this.getTotal
   });
-
-
-
 }
