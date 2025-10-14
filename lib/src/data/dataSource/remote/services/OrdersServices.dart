@@ -6,7 +6,6 @@ import 'package:flutter_application_1/src/domain/utils/Resource.dart';
 import 'package:http/http.dart' as http;
 
 class OrdersService {
-
   Future<String> token;
 
   OrdersService(this.token);
@@ -14,24 +13,35 @@ class OrdersService {
   /// Obtiene todas las órdenes de un cliente específico
   Future<Resource<List<Order>>> getOrdersByClient(int clientId) async {
     try {
-      Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/orders/client/$clientId/');
+      Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/orders/client/$clientId');
       Map<String, String> headers = {
         "Content-Type": "application/json",
-        "Authorization": await token
+        "Authorization": await token,
       };
-      
+
       final response = await http.get(url, headers: headers);
       final data = json.decode(response.body);
-      
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        List<Order> orders = orderFromJson(json.encode(data));
+        // ✅ Verifica si la respuesta tiene el campo "data" o si es una lista directamente
+        final list =
+            (data is List)
+                ? data
+                : (data['data'] ??
+                    []); // si viene dentro de data, lo toma; si no, lista vacía
+
+        List<Order> orders =
+            (list as List)
+                .map((item) => Order.fromJson(item as Map<String, dynamic>))
+                .toList();
+
         return Success(orders);
       } else {
-        return Error(ListToString(data['message']));
+        return Error(ListToString(data['message'] ?? 'Error desconocido'));
       }
     } catch (e) {
-      print('Error getOrdersByClient: $e');
-      return Error(e.toString());
+      print('❌ Error getOrdersByClient: $e');
+      return Error('Error al obtener las órdenes: $e');
     }
   }
 
@@ -41,12 +51,12 @@ class OrdersService {
       Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/orders/$orderId/');
       Map<String, String> headers = {
         "Content-Type": "application/json",
-        "Authorization": await token
+        "Authorization": await token,
       };
-      
+
       final response = await http.get(url, headers: headers);
       final data = json.decode(response.body);
-      
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         Order order = Order.fromJson(data);
         return Success(order);
@@ -73,7 +83,7 @@ class OrdersService {
       Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/orders');
       Map<String, String> headers = {
         "Content-Type": "application/json",
-        "Authorization": await token
+        "Authorization": await token,
       };
 
       // Construir el body de la solicitud

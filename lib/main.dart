@@ -7,6 +7,8 @@ import 'package:flutter_application_1/src/presentation/pages/client/address/crea
 import 'package:flutter_application_1/src/presentation/pages/client/address/list/ClientAddressListPage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/home/ClientHomePage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/order/confirmation/ClientOrderConfirmationPage.dart';
+import 'package:flutter_application_1/src/presentation/pages/client/order/detail/ClientOrderDetailPage.dart';
+import 'package:flutter_application_1/src/presentation/pages/client/order/list/ClientOrderListPage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/product/detail/ClientProductDetailPage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/product/list/ClientProductListPage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/ClientShoppingBagPage.dart';
@@ -56,6 +58,10 @@ class MyApp extends StatelessWidget {
           'client/address/list': (BuildContext context) => ClientAddressListPage(),
           'client/address/create': (BuildContext context) => ClientAddressCreatePage(),
           'client/order/confirmation': (context) => const ClientOrderConfirmationPage(),
+          'client/order/list': (BuildContext context) => const ClientOrderListPage(),
+          'client/order/detail': (context) => const ClientOrderDetailPage(),
+
+
         },
       ),
     );

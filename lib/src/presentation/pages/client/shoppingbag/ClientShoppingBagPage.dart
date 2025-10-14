@@ -40,7 +40,6 @@ class _ClientShoppingBagPageState extends State<ClientShoppingBagPage> {
   Widget build(BuildContext context) {
     _bloc = BlocProvider.of<ClientShoppingBagBloc>(context);
     return Scaffold(
-      appBar: HomeAppBar(title: 'Mi Orden'),
       body: Stack(
         children: [
           BlocBuilder<ClientShoppingBagBloc, ClientShoppingBagState>(
