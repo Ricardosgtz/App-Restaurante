@@ -1,3 +1,3 @@
 class Apiconfig {
-  static const String API_ECOMMERCE = "192.168.100.13:3000";
+  static const String API_ECOMMERCE = "app-django-86x6.onrender.com";
 }

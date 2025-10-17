@@ -14,7 +14,7 @@ class CategoriesService {
 
   Future<Resource<List<Category>>> getCategories() async {
     try {
-      Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/categories/getCategories');
+      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/categories/getCategories');
       Map<String, String> headers = {
         "Content-Type": "application/json",
         "Authorization": await token,

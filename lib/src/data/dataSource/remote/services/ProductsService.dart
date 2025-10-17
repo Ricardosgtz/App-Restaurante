@@ -12,7 +12,7 @@ class ProductsService {
 
   Future<Resource<List<Product>>> getProductByCategory(int idCategory) async {
     try {
-      Uri url = Uri.http(
+      Uri url = Uri.https(
         Apiconfig.API_ECOMMERCE,
         '/products/category/$idCategory',
       );

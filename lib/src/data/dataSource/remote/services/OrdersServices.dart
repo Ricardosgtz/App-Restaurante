@@ -13,7 +13,7 @@ class OrdersService {
   /// Obtiene todas las órdenes de un cliente específico
   Future<Resource<List<Order>>> getOrdersByClient(int clientId) async {
     try {
-      Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/orders/client/$clientId');
+      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/orders/client/$clientId');
       Map<String, String> headers = {
         "Content-Type": "application/json",
         "Authorization": await token,
@@ -48,7 +48,7 @@ class OrdersService {
   /// Obtiene el detalle completo de una orden específica
   Future<Resource<Order>> getOrderDetail(int orderId) async {
     try {
-      Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/orders/$orderId');
+      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/orders/$orderId');
       Map<String, String> headers = {
         "Content-Type": "application/json",
         "Authorization": await token,
@@ -80,7 +80,7 @@ class OrdersService {
     required List<Map<String, dynamic>> items,
   }) async {
     try {
-      Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/orders');
+      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/orders');
       Map<String, String> headers = {
         "Content-Type": "application/json",
         "Authorization": await token,

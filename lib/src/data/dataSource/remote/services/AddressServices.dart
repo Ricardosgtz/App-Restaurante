@@ -15,7 +15,7 @@ class AddressServices{
   Future<Resource<Address>> create(Address address) async {
     try {
       print('Address: ${address.toJson()}');
-      Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/address');      
+      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/address');      
       Map<String, String> headers = { 
         "Content-Type": "application/json",
         "Authorization": await token
@@ -39,7 +39,7 @@ class AddressServices{
 
   Future<Resource<List<Address>>> getUserAddress(int idClient) async {
      try {
-      Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/address/clients/$idClient'); 
+      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/address/clients/$idClient'); 
       Map<String, String> headers = { 
         "Content-Type": "application/json",
         "Authorization": await token
@@ -62,7 +62,7 @@ class AddressServices{
 
   Future<Resource<bool>> delete(int id) async {
      try {
-      Uri url = Uri.http(Apiconfig.API_ECOMMERCE, '/address/$id');     
+      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/address/$id');     
       Map<String, String> headers = { 
         "Content-Type": "application/json",
         "Authorization": await token
