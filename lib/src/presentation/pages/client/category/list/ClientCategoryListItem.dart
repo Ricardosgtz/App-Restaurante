@@ -79,14 +79,6 @@ class ClientCategoryListItem extends StatelessWidget {
                       Container(
                         width: double.infinity,
                         height: 300,
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Colors.transparent, Colors.black.withOpacity(0.1)],
-                          ),
-                        ),
                       ),
                   ],
                 ),
