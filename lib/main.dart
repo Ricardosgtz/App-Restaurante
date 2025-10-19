@@ -60,8 +60,6 @@ class MyApp extends StatelessWidget {
           'client/order/confirmation': (context) => const ClientOrderConfirmationPage(),
           'client/order/list': (BuildContext context) => const ClientOrderListPage(),
           'client/order/detail': (context) => const ClientOrderDetailPage(),
-
-
         },
       ),  
     );

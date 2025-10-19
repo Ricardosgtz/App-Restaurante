@@ -21,7 +21,7 @@ class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _bloc?.add(GetCategories());
     });
   }
@@ -29,12 +29,15 @@ class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
   @override
   Widget build(BuildContext context) {
     _bloc = BlocProvider.of<ClientCategoryListBloc>(context);
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
+      backgroundColor: Colors.white,
       body: BlocListener<ClientCategoryListBloc, ClientCategoryListState>(
         listener: (context, state) {
           final responseState = state.response;
           if (responseState is Success) {
-            if (responseState.data is bool){
+            if (responseState.data is bool) {
               _bloc?.add(GetCategories());
             }
           }
@@ -48,16 +51,42 @@ class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
         child: BlocBuilder<ClientCategoryListBloc, ClientCategoryListState>(
           builder: (context, state) {
             final responseState = state.response;
+
             if (responseState is Success) {
               List<Category> categories = responseState.data as List<Category>;
-              return ListView.builder(
+
+              if (categories.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No hay categorías disponibles',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                );
+              }
+
+              // ✅ GridView con 2 columnas
+              return GridView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // 🟩 Dos columnas
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.60, // 🧩 Ajusta la proporción de alto/ancho
+                ),
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
                   return ClientCategoryListItem(_bloc, categories[index]);
                 },
               );
             }
-            return Container();
+
+            // 🔄 Puedes poner aquí un loader bonito
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.orange,
+                strokeWidth: 3,
+              ),
+            );
           },
         ),
       ),
