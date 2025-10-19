@@ -20,35 +20,42 @@ class ClientProductDetailContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final primary = AppTheme.primaryColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F5F7), // 🔹 fondo plano, sin degradado
+      backgroundColor: const Color(0xFFF8F9FB),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 50),
+            const SizedBox(height: 30),
 
-            // 🖼 Imagen principal del producto
+            // 🖼 Imagen principal con borde anaranjado y sombra suave
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
+              margin: const EdgeInsets.symmetric(horizontal: 22),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: Colors.orangeAccent.withOpacity(0.9), // 🟠 Borde anaranjado
+                  width: 3,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primaryColor.withOpacity(0.5),
-                    blurRadius: 30,
-                    offset: const Offset(0, 2),
+                    color: Colors.orangeAccent.withOpacity(0.25),
+                    blurRadius: 25,
+                    offset: const Offset(0, 10),
                   ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(24),
                 child: ImageSlideshow(
                   width: size.width * 0.9,
                   height: 340,
                   initialPage: 0,
-                  indicatorColor: AppTheme.primaryColor,
+                  indicatorColor: primary,
                   indicatorBackgroundColor: Colors.grey.shade300,
+                  isLoop: true,
+                  autoPlayInterval: 0, // 🔹 No reproduce automáticamente
                   children: [
                     _productImage(product?.image1),
                     _productImage(product?.image2),
@@ -57,20 +64,24 @@ class ClientProductDetailContent extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 25),
+            const SizedBox(height: 30),
 
-            // 🔹 Tarjeta de información flotante
+            // 🧾 Tarjeta de detalle limpia
             Container(
-              width: size.width * 0.95,
-              margin: const EdgeInsets.only(bottom: 25),
+              width: size.width * 0.93,
+              margin: const EdgeInsets.only(bottom: 40),
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: Colors.grey.withOpacity(0.15),
+                  width: 1,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 18,
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 16,
                     offset: const Offset(0, 6),
                   ),
                 ],
@@ -78,48 +89,47 @@ class ClientProductDetailContent extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 🔸 Nombre del producto
+                  // Nombre
                   Text(
                     product?.name ?? '',
                     style: GoogleFonts.poppins(
-                      fontSize: 22,
+                      fontSize: 23,
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.primaryColor,
-                      letterSpacing: 0.3,
+                      color: primary,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
 
-                  // 🔸 Descripción
+                  // Descripción
                   Text(
-                    product?.description ?? '',
+                    product?.description ??
+                        'Delicioso platillo preparado con ingredientes frescos.',
                     style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      color: Colors.grey[700],
-                      height: 1.5,
+                      fontSize: 14.5,
+                      color: Colors.grey.shade700,
+                      height: 1.6,
                     ),
                   ),
+                  const SizedBox(height: 24),
 
-                  const SizedBox(height: 20),
-
-                  // 🔸 Precio
+                  // Precio
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '\$${product?.price.toStringAsFixed(2) ?? ''}',
+                        '\$${product?.price.toStringAsFixed(2) ?? '0.00'}',
                         style: GoogleFonts.poppins(
-                          fontSize: 20,
+                          fontSize: 26,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryColor,
+                          color: primary,
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 30),
 
-                  // 🔹 Controles y botón agregar
+                  // Controles
                   _actionsShoppingBag(context),
                 ],
               ),
@@ -130,87 +140,81 @@ class ClientProductDetailContent extends StatelessWidget {
     );
   }
 
-  // 🖼 Widget para imagen del producto
+  // 🖼 Imagen del producto
   Widget _productImage(String? imageUrl) {
     if (imageUrl != null && imageUrl.isNotEmpty) {
-      return FadeInImage.assetNetwork(
-        placeholder: 'assets/img/no-image.png',
-        image: imageUrl,
-        fit: BoxFit.cover,
+      return Container(
+        color: Colors.white,
+        child: FadeInImage.assetNetwork(
+          placeholder: 'assets/img/no-image.png',
+          image: imageUrl,
+          fit: BoxFit.cover,
+        ),
       );
     } else {
       return Image.asset('assets/img/no-image.png', fit: BoxFit.cover);
     }
   }
 
-  // 🛒 Sección: cantidad + botón agregar
+  // 🛒 Controles y botón agregar
   Widget _actionsShoppingBag(BuildContext context) {
+    final primary = AppTheme.primaryColor;
+
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // 🔘 Selector cantidad
+        // 🔘 Controles cantidad
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.grey.shade200, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: Colors.grey.shade300),
           ),
           child: Row(
             children: [
-              _iconButton(CupertinoIcons.minus_circle_fill, () => bloc?.add(SubtractItem())),
-              const SizedBox(width: 15),
+              _iconButton(CupertinoIcons.minus, () => bloc?.add(SubtractItem())),
+              const SizedBox(width: 20),
               Text(
                 state.quantity.toString(),
                 style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
+                  color: Colors.grey.shade900,
                 ),
               ),
-              const SizedBox(width: 15),
-              _iconButton(CupertinoIcons.add_circled_solid, () => bloc?.add(AddItem())),
+              const SizedBox(width: 20),
+              _iconButton(CupertinoIcons.add, () => bloc?.add(AddItem())),
             ],
           ),
         ),
 
-        const Spacer(),
-
-        // 🛒 Botón agregar con degradado elegante
+        // 🟢 Botón agregar moderno
         GestureDetector(
           onTap: () async {
             await AlertHelper.showAlertDialog(
               context: context,
-              title: "¡Producto agregado!",
-              message: "Se agregó a la bolsa de compras correctamente.",
+              title: "¡Agregado con éxito!",
+              message: "El producto se añadió a tu bolsa.",
               isSuccess: true,
             );
             bloc?.add(AddProductToShoppingBag(product: product!));
           },
           child: Container(
-            width: 160,
+            width: 140,
             height: 55,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  AppTheme.primaryColor,
-                  Colors.orangeAccent,
-                ],
+                colors: [primary.withOpacity(0.95), primary.withOpacity(0.8)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.primaryColor.withOpacity(0.4),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
+                  color: primary.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
@@ -220,7 +224,7 @@ class ClientProductDetailContent extends StatelessWidget {
                 const Icon(
                   CupertinoIcons.cart_fill_badge_plus,
                   color: Colors.white,
-                  size: 24,
+                  size: 23,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -229,7 +233,7 @@ class ClientProductDetailContent extends StatelessWidget {
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
+                    letterSpacing: 0.3,
                   ),
                 ),
               ],
@@ -240,8 +244,10 @@ class ClientProductDetailContent extends StatelessWidget {
     );
   }
 
-  // 🔹 Botón redondo Cupertino
+  // 🔘 Botón de ícono minimalista
   Widget _iconButton(IconData icon, VoidCallback onTap) {
+    final primary = AppTheme.primaryColor;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -250,15 +256,16 @@ class ClientProductDetailContent extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.white,
+          border: Border.all(color: primary.withOpacity(0.2)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 6,
-              offset: const Offset(1, 3),
+              offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Icon(icon, color: AppTheme.primaryColor, size: 28),
+        child: Icon(icon, color: primary, size: 22),
       ),
     );
   }
