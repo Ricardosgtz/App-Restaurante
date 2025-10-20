@@ -11,51 +11,86 @@ class ProfileInfoContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
+    final primary = AppTheme.primaryColor;
 
-            // Imagen perfil con botón de editar
-            Stack(
-              children: [
-                _imageProfile(),
-                Positioned(
-                  bottom: 5,
-                  right: 15,
-                  child: _editButton(context),
+    return Scaffold(
+      backgroundColor: const Color(0xFFFDFDFD),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+
+              // 👤 Imagen perfil (estilo original)
+              Stack(
+                children: [
+                  _imageProfile(primary),
+                  Positioned(
+                    bottom: 5,
+                    right: 15,
+                    child: _editButton(context, primary),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 35),
+
+              // 🏷️ Título principal
+              Text(
+                'Mi Perfil',
+                style: GoogleFonts.poppins(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: primary,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Tu información personal',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 30),
 
-            const SizedBox(height: 40),
+              // 📋 Tarjetas informativas
+              _infoCard(
+                CupertinoIcons.person_fill,
+                '${cliente?.name ?? ''} ${cliente?.lastname ?? ''}',
+                "Nombre de Usuario",
+              ),
+              _infoCard(
+                CupertinoIcons.mail_solid,
+                cliente?.email ?? '',
+                "Correo Electrónico",
+              ),
+              _infoCard(
+                CupertinoIcons.phone_solid,
+                cliente?.phone ?? '',
+                "Teléfono",
+              ),
 
-            // Info cards
-            _infoCard(CupertinoIcons.person_solid,
-                '${cliente?.name ?? ''} ${cliente?.lastname ?? ''}', "Nombre de Usuario"),
-            _infoCard(CupertinoIcons.mail_solid, cliente?.email ?? '', "Correo Electrónico"),
-            _infoCard(CupertinoIcons.phone_solid, cliente?.phone ?? '', "Teléfono"),
-
-            // Spacer opcional para mantener todo centrado en pantallas grandes
-            const Spacer(),
-          ],
+              const Spacer(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _imageProfile() {
+  /// 👤 Imagen perfil (manteniendo tu estilo original)
+  Widget _imageProfile(Color primary) {
     return Container(
-      width: 210,
-      height: 210,
+      width: 170,
+      height: 170,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: AppTheme.primaryColor, width: 5),
+        border: Border.all(color: primary, width: 5),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.15),
+            color: primary.withOpacity(0.15),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -78,61 +113,71 @@ class ProfileInfoContent extends StatelessWidget {
     );
   }
 
-  Widget _editButton(BuildContext context) {
-    return Material(
-      color: AppTheme.primaryColor,
-      shape: const CircleBorder(),
-      elevation: 4,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: () {
-          Navigator.pushNamed(context, 'profile/update', arguments: cliente);
-        },
-        child: const Padding(
-          padding: EdgeInsets.all(10),
-          child: Icon(CupertinoIcons.pencil_outline, color: Colors.white, size: 28),
+  /// ✏️ Botón editar (estilo limpio y moderno)
+  Widget _editButton(BuildContext context, Color primary) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, 'profile/update', arguments: cliente);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: primary,
+          boxShadow: [
+            BoxShadow(
+              color: primary.withOpacity(0.4),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Icon(
+          CupertinoIcons.pencil_outline,
+          color: Colors.white,
+          size: 26,
         ),
       ),
     );
   }
 
+  /// 💼 Tarjeta informativa refinada
   Widget _infoCard(IconData icon, String title, String subtitle) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.white, Colors.grey[50]!],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(25),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12.withOpacity(0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Ícono decorativo
           Container(
             decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.2),
+              color: AppTheme.primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.primaryColor.withOpacity(0.15),
-                  blurRadius: 6,
-                  offset: const Offset(0, 3),
-                ),
-              ],
             ),
-            padding: const EdgeInsets.all(14),
-            child: Icon(icon, color: AppTheme.primaryColor, size: 26),
+            padding: const EdgeInsets.all(12),
+            child: Icon(
+              icon,
+              color: AppTheme.primaryColor,
+              size: 24,
+            ),
           ),
-          const SizedBox(width: 20),
+
+          const SizedBox(width: 16),
+
+          // Texto principal
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,13 +185,13 @@ class ProfileInfoContent extends StatelessWidget {
                 Text(
                   subtitle,
                   style: GoogleFonts.poppins(
-                    fontSize: 12,
+                    fontSize: 13,
                     color: Colors.grey[600],
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  title,
+                  title.isNotEmpty ? title : 'Sin información',
                   style: GoogleFonts.poppins(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/config/AppTheme.dart';
@@ -7,7 +8,6 @@ import 'package:flutter_application_1/src/presentation/pages/profile/update/bloc
 import 'package:flutter_application_1/src/presentation/pages/profile/update/bloc/ProfileUpdateEvent.dart';
 import 'package:flutter_application_1/src/presentation/pages/profile/update/bloc/ProfileUpdateState.dart';
 import 'package:flutter_application_1/src/presentation/utils/SelectOptionlmageDialog.dart';
-import 'package:flutter_application_1/src/presentation/widgets/DefaultTextField.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ProfileUpdateContent extends StatefulWidget {
@@ -26,183 +26,251 @@ class _ProfileUpdateContentState extends State<ProfileUpdateContent> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = AppTheme.primaryColor;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFDFD),
+      backgroundColor: Colors.white,
       body: Form(
         key: widget.state.formKey,
         autovalidateMode:
             _showErrors ? AutovalidateMode.always : AutovalidateMode.disabled,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  const SizedBox(height: 30),
-                  _headerSection(),
-                  const SizedBox(height: 50),
-                  _cardForm(context),
-                ],
-              ),
-            ),
-          ],
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 50),
+          child: Column(
+            children: [
+              _headerSection(primary),
+              const SizedBox(height: 35),
+              _glassCardForm(context),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// 🧑‍💼 Header con imagen de perfil y botón de cámara
-  Widget _headerSection() {
-    return Stack(
+  /// 🧑‍💼 Header con foto de perfil
+  Widget _headerSection(Color primary) {
+    return Column(
       children: [
-        Container(
-          width: 210,
-          height: 210,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: AppTheme.primaryColor, width: 4),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primaryColor.withOpacity(0.15),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+        Stack(
+          children: [
+            Container(
+              width: 170,
+              height: 170,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: primary, width: 4),
+                boxShadow: [
+                  BoxShadow(
+                    color: primary.withOpacity(0.15),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: ClipOval(
-            child: widget.state.image != null
-                ? Image.file(widget.state.image!, fit: BoxFit.cover)
-                : (widget.cliente?.image != null
-                    ? Image.network(widget.cliente!.image!, fit: BoxFit.cover)
-                    : Image.asset('assets/img/user_image.png', fit: BoxFit.cover)),
-          ),
-        ),
-        Positioned(
-          bottom: 15,
-          right: 5,
-          child: Material(
-            color: AppTheme.primaryColor,
-            shape: const CircleBorder(),
-            elevation: 6,
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: () {
-                SelectOpcionImageDialog(
-                  context,
-                  () => widget.bloc?.add(ProfileUpdatePickImage()),
-                  () => widget.bloc?.add(ProfileUpdateTakePhoto()),
-                );
-              },
-              child: const Padding(
-                padding: EdgeInsets.all(12),
-                child: Icon(
-                  CupertinoIcons.camera_fill,
-                  color: Colors.white,
-                  size: 28,
+              child: ClipOval(
+                child: widget.state.image != null
+                    ? Image.file(widget.state.image!, fit: BoxFit.cover)
+                    : (widget.cliente?.image != null
+                        ? Image.network(widget.cliente!.image!,
+                            fit: BoxFit.cover)
+                        : Image.asset('assets/img/user_image.png',
+                            fit: BoxFit.cover)),
+              ),
+            ),
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: Material(
+                color: primary,
+                shape: const CircleBorder(),
+                elevation: 6,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: () {
+                    SelectOpcionImageDialog(
+                      context,
+                      () => widget.bloc?.add(ProfileUpdatePickImage()),
+                      () => widget.bloc?.add(ProfileUpdateTakePhoto()),
+                    );
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.all(5),
+                    child: Icon(
+                      CupertinoIcons.camera_fill,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
                 ),
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        Text(
+          'Editar perfil',
+          style: GoogleFonts.poppins(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: primary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Actualiza tu información personal',
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.black54,
           ),
         ),
       ],
     );
   }
 
-  /// 📦 Tarjeta del formulario
-  Widget _cardForm(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOut,
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 5),
+  /// 🧊 Tarjeta con los campos personalizados
+  Widget _glassCardForm(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(26),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 30),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _textFieldName(),
-          _textFieldLastname(),
-          _textFieldPhone(),
-          const SizedBox(height: 25),
-          _fabSubmit(),
-        ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _textFieldName(),
+              const SizedBox(height: 18),
+              _textFieldLastname(),
+              const SizedBox(height: 18),
+              _textFieldPhone(),
+              const SizedBox(height: 30),
+              _saveButton(),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   /// 👤 Campo Nombre
   Widget _textFieldName() {
-    return DefaultTextField(
+    return _buildInputContainer(
+      icon: CupertinoIcons.person_fill,
       label: 'Nombre',
-      icon: CupertinoIcons.person_solid,
-      color: AppTheme.primaryColor,
       initialValue: widget.cliente?.name ?? '',
-      onChanged: (text) {
-        widget.bloc?.add(ProfileUpdateNameChanged(name: BlocFormItem(value: text)));
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return _showErrors ? 'Ingresa el nombre' : null;
-        }
-        return null;
-      },
+      onChanged: (text) => widget.bloc
+          ?.add(ProfileUpdateNameChanged(name: BlocFormItem(value: text))),
+      validator: (value) =>
+          (value == null || value.isEmpty) && _showErrors ? 'Ingresa el nombre' : null,
     );
   }
 
   /// 👤 Campo Apellido
   Widget _textFieldLastname() {
-    return DefaultTextField(
-      label: 'Apellido',
+    return _buildInputContainer(
       icon: CupertinoIcons.person,
-      color: AppTheme.primaryColor,
+      label: 'Apellido',
       initialValue: widget.cliente?.lastname ?? '',
-      onChanged: (text) {
-        widget.bloc?.add(ProfileUpdateLastnameChanged(lastname: BlocFormItem(value: text)));
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return _showErrors ? 'Ingresa el apellido' : null;
-        }
-        return null;
-      },
+      onChanged: (text) => widget.bloc?.add(
+          ProfileUpdateLastnameChanged(lastname: BlocFormItem(value: text))),
+      validator: (value) => (value == null || value.isEmpty) && _showErrors
+          ? 'Ingresa el apellido'
+          : null,
     );
   }
 
   /// 📞 Campo Teléfono
   Widget _textFieldPhone() {
-    return DefaultTextField(
+    return _buildInputContainer(
+      icon: CupertinoIcons.phone_fill,
       label: 'Teléfono',
-      icon: CupertinoIcons.phone_solid,
-      color: AppTheme.primaryColor,
       initialValue: widget.cliente?.phone ?? '',
-      onChanged: (text) {
-        widget.bloc?.add(ProfileUpdatePhoneChanged(phone: BlocFormItem(value: text)));
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return _showErrors ? 'Ingresa el teléfono' : null;
-        }
-        return null;
-      },
+      onChanged: (text) => widget.bloc
+          ?.add(ProfileUpdatePhoneChanged(phone: BlocFormItem(value: text))),
+      validator: (value) => (value == null || value.isEmpty) && _showErrors
+          ? 'Ingresa el teléfono'
+          : null,
     );
   }
 
-  /// 🧡 Botón Guardar
-  Widget _fabSubmit() {
-    return SizedBox(
-      width: double.infinity,
-      height: 55,
+  /// 🔤 Contenedor de campo personalizado (copiado del formulario de dirección)
+  Widget _buildInputContainer({
+    required IconData icon,
+    required String label,
+    required Function(String) onChanged,
+    required String? Function(String?) validator,
+    String initialValue = '',
+  }) {
+    final primary = AppTheme.primaryColor;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        initialValue: initialValue,
+        onChanged: onChanged,
+        validator: validator,
+        style: GoogleFonts.poppins(fontSize: 14.5),
+        decoration: InputDecoration(
+          prefixIcon: Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: primary, size: 22),
+          ),
+          labelText: label,
+          labelStyle: GoogleFonts.poppins(
+            fontSize: 13.5,
+            color: Colors.grey[700],
+          ),
+          border: InputBorder.none,
+        ),
+      ),
+    );
+  }
+
+  /// 🧡 Botón tipo píldora
+  Widget _saveButton() {
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        color: AppTheme.primaryColor,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: ElevatedButton.icon(
         onPressed: () {
           setState(() {
@@ -216,21 +284,24 @@ class _ProfileUpdateContentState extends State<ProfileUpdateContent> {
         icon: const Icon(
           CupertinoIcons.check_mark_circled_solid,
           color: Colors.white,
+          size: 22,
         ),
         label: Text(
-          "Guardar",
+          "Guardar cambios",
           style: GoogleFonts.poppins(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.white,
+            letterSpacing: 0.4,
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.primaryColor,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          elevation: 4,
-          shadowColor: AppTheme.primaryColor.withOpacity(0.3),
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          elevation: 0,
         ),
       ),
     );

@@ -11,6 +11,7 @@ import 'package:flutter_application_1/src/presentation/pages/client/address/list
 import 'package:flutter_application_1/src/presentation/pages/client/address/list/bloc/ClientAddressListState.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ClientAddressListPage extends StatefulWidget {
   const ClientAddressListPage({super.key});
@@ -33,24 +34,18 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
   @override
   Widget build(BuildContext context) {
     _bloc = BlocProvider.of<ClientAddressListBloc>(context);
-
-    // ⚡ Detecta si la página se abrió en modo selección (desde el modal)
     final bool isSelectionMode =
         ModalRoute.of(context)?.settings.arguments == true;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF9F9F9),
       appBar: HomeAppBar(title: 'Mis Direcciones'),
-
-      // ✅ Solo muestra el botón flotante si NO está en modo selección
       floatingActionButton: !isSelectionMode ? _buildAddButton(context) : null,
-
       body: BlocListener<ClientAddressListBloc, ClientAddressListState>(
         listener: (context, state) {
           final responseState = state.response;
-          if (responseState is Success) {
-            if (responseState.data is bool) {
-              _bloc?.add(GetUserAddress());
-            }
+          if (responseState is Success && responseState.data is bool) {
+            _bloc?.add(GetUserAddress());
           }
           if (responseState is Error) {
             Fluttertoast.showToast(
@@ -67,10 +62,15 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
               List<Address> addresses = responseState.data as List<Address>;
               _bloc?.add(SetAddressSession(addressList: addresses));
 
+              if (addresses.isEmpty) {
+                return _buildEmptyState(context);
+              }
+
               return Column(
                 children: [
                   Expanded(
                     child: ListView.builder(
+                      physics: const BouncingScrollPhysics(),
                       itemCount: addresses.length,
                       itemBuilder: (context, index) {
                         return ClientAddressListItem(
@@ -83,64 +83,84 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
                     ),
                   ),
 
-                  // ✅ Solo muestra estos botones si se abrió en modo selección
+                  // 🟧 Botones tipo píldora (pill-shaped)
                   if (isSelectionMode)
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+                        horizontal: 20,
+                        vertical: 16,
                       ),
                       child: Row(
                         children: [
-                          // 🟩 Botón Confirmar
+                          // 🔶 Botón Confirmar
                           Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                if (state.addressSelected != null) {
-                                  Navigator.pop(
-                                    context,
-                                    state.addressSelected!,
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Selecciona una dirección primero',
+                            child: Container(
+                              height: 50,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    AppTheme.primaryColor.withOpacity(0.95),
+                                    AppTheme.primaryColor.withOpacity(0.8),
+                                  ],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ),
+                                borderRadius: BorderRadius.circular(30),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppTheme.primaryColor
+                                        .withOpacity(0.35),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  if (state.addressSelected != null) {
+                                    Navigator.pop(
+                                      context,
+                                      state.addressSelected!,
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Selecciona una dirección primero',
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                }
-                              },
-                              icon: const Icon(
-                                Icons.check_circle_outline,
-                                size: 18,
-                              ),
-                              label: const Text(
-                                'Confirmar',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
+                                    );
+                                  }
+                                },
+                                icon: const Icon(
+                                  Icons.check_circle_outline,
+                                  size: 20,
+                                  color: Colors.white,
                                 ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.primaryColor,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(double.infinity, 45),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                label: Text(
+                                  'Confirmar',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                  horizontal: 8,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
 
-                          const SizedBox(
-                            width: 12,
-                          ), // Espacio entre los botones
-                          // ⬜️ Botón Agregar nueva dirección
+                          const SizedBox(width: 12),
+
+                          // ⬜️ Botón Agregar
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: () {
@@ -149,31 +169,33 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
                                   'client/address/create',
                                 );
                               },
-                              icon: const Icon(
-                                Icons.add_location_alt_outlined,
-                                size: 18,
+                              icon: Icon(
+                                Icons.add_location_alt_rounded,
+                                size: 20,
+                                color: AppTheme.primaryColor,
                               ),
-                              label: const Text(
+                              label: Text(
                                 'Agregar',
-                                style: TextStyle(
-                                  fontSize: 13,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 15,
                                   fontWeight: FontWeight.w600,
+                                  color: AppTheme.primaryColor,
+                                  letterSpacing: 0.4,
                                 ),
                               ),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppTheme.primaryColor,
                                 side: BorderSide(
                                   color: AppTheme.primaryColor,
-                                  width: 1.3,
+                                  width: 1.5,
                                 ),
-                                minimumSize: const Size(double.infinity, 45),
+                                backgroundColor: Colors.white,
+                                minimumSize: const Size(double.infinity, 50),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(30),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                  horizontal: 8,
-                                ),
+                                shadowColor: Colors.grey.withOpacity(0.2),
+                                elevation: 2,
                               ),
                             ),
                           ),
@@ -184,14 +206,82 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
               );
             }
 
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFFF57C00),
+                strokeWidth: 3,
+              ),
+            );
           },
         ),
       ),
     );
   }
 
-  // 🔹 Botón flotante con efecto glass (solo modo normal)
+  // 📭 Estado vacío elegante
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              CupertinoIcons.map_pin_ellipse,
+              color: AppTheme.primaryColor.withOpacity(0.8),
+              size: 70,
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Aún no tienes direcciones guardadas',
+              style: GoogleFonts.poppins(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Agrega una dirección para poder recibir tus pedidos fácilmente.',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.grey[600],
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pushNamed(context, 'client/address/create');
+              },
+              icon: const Icon(Icons.add_location_alt_rounded, size: 20),
+              label: Text(
+                'Agregar dirección',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14.5,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryColor,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                elevation: 6,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 🧊 Botón flotante con efecto glass
   Widget _buildAddButton(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(40),
@@ -199,19 +289,14 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: AppTheme.primaryColor.withOpacity(0.6),
+            color: AppTheme.primaryColor.withOpacity(0.7),
             border: Border.all(color: Colors.white.withOpacity(0.4)),
             borderRadius: BorderRadius.circular(40),
             boxShadow: [
               BoxShadow(
                 color: AppTheme.primaryColor.withOpacity(0.4),
                 blurRadius: 15,
-                offset: const Offset(0, 5),
-              ),
-              BoxShadow(
-                color: Colors.white.withOpacity(0.2),
-                blurRadius: 10,
-                offset: const Offset(-3, -3),
+                offset: const Offset(0, 6),
               ),
             ],
           ),
@@ -224,7 +309,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
             child: const Icon(
               CupertinoIcons.add,
               color: Colors.white,
-              size: 25,
+              size: 26,
             ),
           ),
         ),

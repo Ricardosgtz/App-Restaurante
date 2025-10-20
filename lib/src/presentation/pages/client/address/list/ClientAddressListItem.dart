@@ -1,10 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/config/AppTheme.dart';
 import 'package:flutter_application_1/src/domain/models/Address.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/address/list/bloc/ClientAddressListBloc.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/address/list/bloc/ClientAddressListEvent.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/address/list/bloc/ClientAddressListState.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ClientAddressListItem extends StatelessWidget {
@@ -13,115 +13,138 @@ class ClientAddressListItem extends StatelessWidget {
   final Address address;
   final int index;
 
-  const ClientAddressListItem(this.bloc, this.state, this.address, this.index, {super.key});
+  const ClientAddressListItem(
+    this.bloc,
+    this.state,
+    this.address,
+    this.index, {
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final bool isSelected = state.radioValue == index;
+    final primary = AppTheme.primaryColor;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: IntrinsicHeight( // ⚡ Ajusta altura de la fila según el contenido más alto
-        child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: GestureDetector(
+        onTap: () {
+          bloc?.add(ChangeRadioValue(radioValue: index, address: address));
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            color: isSelected ? primary : Colors.white, // 🔥 cambia color al seleccionar
+            borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black12,
-                blurRadius: 8,
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch, // ⚡ Hace que el panel derecho tome toda la altura
+          child: Stack(
+            alignment: Alignment.bottomRight,
             children: [
-              // 👉 Parte izquierda clickable (alias + dirección + referencia)
-              Expanded(
-                flex: 3,
-                child: InkWell(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    bottomLeft: Radius.circular(16),
-                  ),
-                  onTap: () {
-                    bloc?.add(ChangeRadioValue(radioValue: index, address: address));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Alias
-                        Text(
-                          address.alias.isNotEmpty ? address.alias : "Sin alias",
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: AppTheme.primaryColor,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        // Dirección
-                        Text(
-                          address.address,
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w500,
-                            fontSize: 15,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        // Referencia con icono
-                        Row(
-                          children: [
-                            const Icon(CupertinoIcons.location_solid, size: 16, color: Colors.grey),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                address.reference,
-                                style: GoogleFonts.poppins(
-                                  color: Colors.grey[600],
-                                  fontSize: 14,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // 👉 Panel derecho con radio y eliminar
-              Container(
-                width: 90,
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 55, 16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Radio(
-                      value: index,
-                      groupValue: state.radioValue,
-                      activeColor: AppTheme.primaryColor,
-                      onChanged: (value) {
-                        bloc?.add(ChangeRadioValue(radioValue: value!, address: address));
-                      },
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        bloc?.add(DeleteAddress(id: address.id!));
-                      },
-                      icon: const Icon(CupertinoIcons.trash, color: Colors.redAccent),
+                    // 🏷️ Contenido de texto
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Alias
+                          Text(
+                            address.alias.isNotEmpty
+                                ? address.alias
+                                : "Sin alias",
+                            style: GoogleFonts.poppins(
+                              fontSize: 16.5,
+                              fontWeight: FontWeight.w700,
+                              color: isSelected ? Colors.white : Colors.black87,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
+
+                          // Dirección
+                          Text(
+                            address.address,
+                            style: GoogleFonts.poppins(
+                              fontSize: 14.5,
+                              color:
+                                  isSelected ? Colors.white : Colors.grey[800],
+                              height: 1.4,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
+
+                          // Referencia
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                CupertinoIcons.map_pin_ellipse,
+                                size: 14,
+                                color:
+                                    isSelected ? Colors.white70 : Colors.grey[600],
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  address.reference.isNotEmpty
+                                      ? address.reference
+                                      : "Sin referencia",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13.3,
+                                    color: isSelected
+                                        ? Colors.white70
+                                        : Colors.grey.shade600,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ],
+                ),
+              ),
+              // 🗑️ Botón eliminar (siempre visible)
+              Positioned(
+                bottom: 8,
+                right: 10,
+                child: GestureDetector(
+                  onTap: () {
+                    bloc?.add(DeleteAddress(id: address.id!));
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.25)
+                          : Colors.redAccent.withOpacity(0.15),
+                    ),
+                    child: Icon(
+                      CupertinoIcons.trash_fill,
+                      color: isSelected
+                          ? Colors.white
+                          : Colors.redAccent,
+                      size: 20,
+                    ),
+                  ),
                 ),
               ),
             ],

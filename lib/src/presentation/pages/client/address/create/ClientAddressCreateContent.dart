@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/config/AppTheme.dart';
@@ -5,7 +6,6 @@ import 'package:flutter_application_1/src/presentation/pages/client/address/crea
 import 'package:flutter_application_1/src/presentation/pages/client/address/create/bloc/ClientAddressCreateEvent.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/address/create/bloc/ClientAddressCreateState.dart';
 import 'package:flutter_application_1/src/presentation/utils/BlocFormItem.dart';
-import 'package:flutter_application_1/src/presentation/widgets/DefaultIconBack.dart';
 import 'package:flutter_application_1/src/presentation/widgets/DefaultTextField.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -26,66 +26,63 @@ class _ClientAddressCreateContentState
 
   @override
   Widget build(BuildContext context) {
+    final primary = AppTheme.primaryColor;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFDFD),
+      backgroundColor: Colors.white,
       body: Form(
         key: widget.state.formKey,
         autovalidateMode:
             _showErrors ? AutovalidateMode.always : AutovalidateMode.disabled,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  const SizedBox(height: 30),
-                  _headerSection(),
-                  const SizedBox(height: 30),
-                  _cardAddressForm(context),
-                ],
-              ),
-            ),
-          ],
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 60),
+          child: Column(
+            children: [
+              _headerSection(primary),
+              const SizedBox(height: 35),
+              _glassCardForm(context),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// 🧭 Encabezado superior con icono e instrucciones
-  Widget _headerSection() {
+  /// 🧭 Encabezado elegante
+  Widget _headerSection(Color primary) {
     return Column(
       children: [
         Container(
           decoration: BoxDecoration(
-            color: AppTheme.primaryColor.withOpacity(0.1),
+            color: primary.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(20),
           child: Icon(
             CupertinoIcons.location_solid,
-            color: AppTheme.primaryColor,
-            size: 160,
+            color: primary,
+            size: 95,
           ),
         ),
         const SizedBox(height: 16),
         Text(
-          'Nueva dirección',
+          'Agregar dirección',
           style: GoogleFonts.poppins(
-            fontSize: 22,
+            color: primary,
             fontWeight: FontWeight.bold,
-            color: AppTheme.primaryColor,
+            fontSize: 22,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 40),
           child: Text(
-            'Agrega un alias y los detalles de tu ubicación para poder identificarla fácilmente.',
+            'Completa los datos para guardar tu nueva ubicación.',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
+              color: Colors.black87,
               fontSize: 14,
-              color: Colors.black54,
               height: 1.4,
             ),
           ),
@@ -94,44 +91,49 @@ class _ClientAddressCreateContentState
     );
   }
 
-  /// 📦 Tarjeta con los campos del formulario
-  Widget _cardAddressForm(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOut,
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 5),
+  /// 🧊 Tarjeta del formulario (estilo glass moderno)
+  Widget _glassCardForm(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(26),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 30),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _textFieldAlias(),
-          _textFieldAddress(),
-          _textFieldReference(),
-          const SizedBox(height: 25),
-          _fabSubmit(),
-        ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _textFieldAlias(),
+              const SizedBox(height: 18),
+              _textFieldAddress(),
+              const SizedBox(height: 18),
+              _textFieldReference(),
+              const SizedBox(height: 30),
+              _saveButton(),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   /// 🏠 Campo Alias
   Widget _textFieldAlias() {
-    return DefaultTextField(
+    return _buildInputContainer(
+      icon: CupertinoIcons.house_fill,
       label: 'Alias (ej. Casa, Oficina)',
-      icon: CupertinoIcons.home,
-      color: AppTheme.primaryColor,
       onChanged: (text) {
         widget.bloc?.add(AliasChanged(alias: BlocFormItem(value: text)));
       },
@@ -146,10 +148,9 @@ class _ClientAddressCreateContentState
 
   /// 📍 Campo Dirección
   Widget _textFieldAddress() {
-    return DefaultTextField(
-      label: 'Dirección completa',
+    return _buildInputContainer(
       icon: CupertinoIcons.map_pin_ellipse,
-      color: AppTheme.primaryColor,
+      label: 'Dirección completa',
       onChanged: (text) {
         widget.bloc?.add(AddressChanged(address: BlocFormItem(value: text)));
       },
@@ -164,12 +165,12 @@ class _ClientAddressCreateContentState
 
   /// 🗺️ Campo Referencia
   Widget _textFieldReference() {
-    return DefaultTextField(
+    return _buildInputContainer(
+      icon: CupertinoIcons.location_solid,
       label: 'Referencia o punto cercano',
-      icon: CupertinoIcons.location,
-      color: AppTheme.primaryColor,
       onChanged: (text) {
-        widget.bloc?.add(ReferenceChanged(reference: BlocFormItem(value: text)));
+        widget.bloc
+            ?.add(ReferenceChanged(reference: BlocFormItem(value: text)));
       },
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -180,17 +181,72 @@ class _ClientAddressCreateContentState
     );
   }
 
-  /// 🧡 Botón Guardar
-  Widget _fabSubmit() {
-    return SizedBox(
-      width: double.infinity,
-      height: 55,
+  /// 🔤 Contenedor de campo personalizado
+  Widget _buildInputContainer({
+    required IconData icon,
+    required String label,
+    required Function(String) onChanged,
+    required String? Function(String?) validator,
+  }) {
+    final primary = AppTheme.primaryColor;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        onChanged: onChanged,
+        validator: validator,
+        style: GoogleFonts.poppins(fontSize: 14.5),
+        decoration: InputDecoration(
+          prefixIcon: Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: primary, size: 22),
+          ),
+          labelText: label,
+          labelStyle: GoogleFonts.poppins(
+            fontSize: 13.5,
+            color: Colors.grey[700],
+          ),
+          border: InputBorder.none,
+        ),
+      ),
+    );
+  }
+
+  /// 🧡 Botón Guardar dirección tipo píldora
+  Widget _saveButton() {
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        color: AppTheme.primaryColor,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: ElevatedButton.icon(
         onPressed: () {
           setState(() {
-            _showErrors = true; // 👈 activa los mensajes
+            _showErrors = true;
           });
-
           if (widget.state.formKey!.currentState!.validate()) {
             widget.bloc?.add(FormSubmit());
           }
@@ -198,6 +254,7 @@ class _ClientAddressCreateContentState
         icon: const Icon(
           CupertinoIcons.check_mark_circled_solid,
           color: Colors.white,
+          size: 22,
         ),
         label: Text(
           "Guardar dirección",
@@ -205,15 +262,16 @@ class _ClientAddressCreateContentState
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.white,
+            letterSpacing: 0.4,
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.primaryColor,
-          foregroundColor: Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          elevation: 4,
-          shadowColor: AppTheme.primaryColor.withOpacity(0.3),
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          elevation: 0,
         ),
       ),
     );
