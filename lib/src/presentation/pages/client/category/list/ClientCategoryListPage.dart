@@ -7,6 +7,7 @@ import 'package:flutter_application_1/src/presentation/pages/client/category/lis
 import 'package:flutter_application_1/src/presentation/pages/client/category/list/bloc/ClientCategoryListState.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ClientCategoryListPage extends StatefulWidget {
   const ClientCategoryListPage({super.key});
@@ -82,9 +83,10 @@ class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
 
             // 🔄 Puedes poner aquí un loader bonito
             return const Center(
-              child: CircularProgressIndicator(
+              child: SpinKitThreeBounce(
                 color: Colors.orange,
-                strokeWidth: 3,
+                size: 30,
+                duration: Duration(seconds: 1),
               ),
             );
           },

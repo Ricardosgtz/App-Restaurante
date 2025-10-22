@@ -12,6 +12,7 @@ import 'package:flutter_application_1/src/presentation/pages/client/address/list
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ClientAddressListPage extends StatefulWidget {
   const ClientAddressListPage({super.key});
@@ -207,10 +208,11 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
             }
 
             return const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFFF57C00),
-                strokeWidth: 3,
-              ),
+              child: SpinKitThreeBounce(
+                  color: Colors.orange,
+                  size: 30,
+                  duration: Duration(seconds: 1),
+                ),
             );
           },
         ),

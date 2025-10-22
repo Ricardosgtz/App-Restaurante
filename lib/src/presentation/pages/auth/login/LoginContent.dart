@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_application_1/src/config/AppTheme.dart';
 import 'package:flutter_application_1/src/presentation/pages/auth/login/bloc/LoginBloc.dart';
 import 'package:flutter_application_1/src/presentation/pages/auth/login/bloc/LoginEvent.dart';
 import 'package:flutter_application_1/src/presentation/pages/auth/login/bloc/LoginState.dart';
@@ -15,110 +16,127 @@ class LoginContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme.apply(
-          fontFamily: GoogleFonts.poppins().fontFamily,
-        );
+    final primary = AppTheme.primaryColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF6EE),
+      backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: EdgeInsets.only(
-                left: 28,
-                right: 28,
-                top: 40,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight - 60),
-                child: IntrinsicHeight(
-                  child: Form(
-                    key: state.formkey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Ícono moderno de restaurante
-                        const Icon(
-                          Icons.set_meal,
-                          size: 110,
-                          color: Color(0xFF8B0000),
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Título
-                        Text(
-                          "Bienvenido",
-                          style: textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 40,
-                            color: const Color(0xFF8B0000),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "Inicia sesión para continuar o registrate",
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: Colors.brown[700],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Email
-                        _textFieldEmail(),
-
-                        const SizedBox(height: 0),
-
-                        // Password
-                        _textFildPassword(),
-
-                        const SizedBox(height: 30),
-
-                        // Botón login
-                        _buttonLogin(context),
-
-                        const SizedBox(height: 25),
-
-                        // Link a registro
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "¿No tienes una cuenta?",
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: Colors.brown[700],
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.pushNamed(context, 'register');
-                              },
-                              child: Text(
-                                "Regístrate",
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: const Color(0xFF8B0000),
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 40,
+            right: 40,
+            top: 90,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
+          child: Form(
+            key: state.formkey, // ✅ volvemos a incluir el formkey aquí
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 🧡 Ícono principal dentro de un círculo degradado
+                Container(
+                  height: 120,
+                  width: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [
+                        primary.withOpacity(0.95),
+                        primary.withOpacity(0.8),
                       ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primary.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.set_meal_rounded,
+                    size: 70,
+                    color: Colors.white,
                   ),
                 ),
-              ),
-            );
-          },
+
+                const SizedBox(height: 30),
+
+                // 🧾 Título
+                Text(
+                  "Bienvenido",
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 38,
+                    color: primary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Inicia sesión para continuar",
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    color: Colors.grey[700],
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                // 📧 Campo de correo
+                _textFieldEmail(),
+
+                const SizedBox(height: 5),
+
+                // 🔒 Campo de contraseña
+                _textFieldPassword(),
+
+                const SizedBox(height: 30),
+
+                // 🚪 Botón de login
+                _buttonLogin(context, primary),
+
+                const SizedBox(height: 30),
+
+                // 🧩 Enlace a registro
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "¿No tienes una cuenta?",
+                      style: GoogleFonts.poppins(
+                        fontSize: 14.5,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, 'register');
+                      },
+                      child: Text(
+                        "Regístrate",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.5,
+                          color: primary,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
+  // 📧 Campo de correo electrónico
   Widget _textFieldEmail() {
     return DefaultTextField(
       label: 'Correo electrónico',
@@ -126,33 +144,34 @@ class LoginContent extends StatelessWidget {
       onChanged: (text) {
         bloc?.add(EmailChanged(email: BlocFormItem(value: text)));
       },
-      validator: (value) {
-        return state.email.error;
-      },
+      validator: (value) => state.email.error,
     );
   }
 
-  Widget _textFildPassword() {
+  // 🔒 Campo de contraseña
+  Widget _textFieldPassword() {
     return DefaultTextField(
       label: 'Contraseña',
-      icon: Icons.key,
+      icon: Icons.lock_outline,
       obscureText: true,
       onChanged: (text) {
         bloc?.add(PasswordChanged(password: BlocFormItem(value: text)));
       },
-      validator: (value) {
-        return state.password.error;
-      },
+      validator: (value) => state.password.error,
     );
   }
 
-  Widget _buttonLogin(BuildContext context) {
+  // 🚪 Botón de login con degradado
+  Widget _buttonLogin(BuildContext context, Color primary) {
     return SizedBox(
       width: double.infinity,
       height: 55,
       child: ElevatedButton(
         onPressed: () {
-          if (state.formkey!.currentState!.validate()) {
+          // ✅ validamos que el formkey exista antes de usarlo
+          if (state.formkey != null &&
+              state.formkey!.currentState != null &&
+              state.formkey!.currentState!.validate()) {
             bloc?.add(LoginSubmit());
           } else {
             Fluttertoast.showToast(
@@ -162,18 +181,39 @@ class LoginContent extends StatelessWidget {
           }
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF8B0000),
+          padding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          elevation: 0,
+          elevation: 6,
+        ).copyWith(
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (states) => null,
+          ),
         ),
-        child: Text(
-          "Iniciar Sesión",
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                primary.withOpacity(0.95),
+                primary.withOpacity(0.8),
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Container(
+            alignment: Alignment.center,
+            child: Text(
+              "Iniciar Sesión",
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.3,
+              ),
+            ),
           ),
         ),
       ),

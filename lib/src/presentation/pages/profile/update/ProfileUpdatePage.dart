@@ -11,6 +11,7 @@ import 'package:flutter_application_1/src/presentation/pages/profile/update/bloc
 import 'package:flutter_application_1/src/presentation/widgets/HomeAppBar.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_application_1/src/presentation/utils/AlertHelper.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ProfileUpdatePage extends StatefulWidget {
   const ProfileUpdatePage({super.key});
@@ -65,7 +66,9 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
               message: "Actualización exitosa del perfil.",
               isSuccess: true,
               onClose: () {
-                Navigator.of(context).pop(); // opcional: cerrar página si quieres
+                Navigator.of(
+                  context,
+                ).pop(); // opcional: cerrar página si quieres
               },
             );
           }
@@ -77,7 +80,13 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
               return Stack(
                 children: [
                   ProfileUpdateContent(_bloc, state, cliente),
-                  const Center(child: CircularProgressIndicator()),
+                  const Center(
+                    child: SpinKitThreeBounce(
+                      color: Colors.orange,
+                      size: 30,
+                      duration: Duration(seconds: 1),
+                    ),
+                  ),
                 ],
               );
             }

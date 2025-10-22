@@ -9,6 +9,7 @@ import 'package:flutter_application_1/src/presentation/pages/client/product/list
 import 'package:flutter_application_1/src/presentation/widgets/HomeAppBar.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ClientProductListPage extends StatefulWidget {
   const ClientProductListPage({super.key});
@@ -57,7 +58,13 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
             final responseState = state.response;
 
             if (responseState is Loading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: SpinKitThreeBounce(
+                  color: Colors.orange,
+                  size: 30,
+                  duration: Duration(seconds: 1),
+                ),
+              );
             }
 
             if (responseState is Success) {
@@ -78,20 +85,24 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
                     fontSize: 16.0,
                   );
                 },
-                child: products.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'No hay productos disponibles',
-                          style: TextStyle(fontSize: 16),
+                child:
+                    products.isEmpty
+                        ? const Center(
+                          child: Text(
+                            'No hay productos disponibles',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        )
+                        : ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: products.length,
+                          itemBuilder: (context, index) {
+                            return ClientProductListItem(
+                              _bloc,
+                              products[index],
+                            );
+                          },
                         ),
-                      )
-                    : ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: products.length,
-                        itemBuilder: (context, index) {
-                          return ClientProductListItem(_bloc, products[index]);
-                        },
-                      ),
               );
             }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_application_1/src/config/AppTheme.dart'; // 👈 Importa tu AppTheme
 
 class DefaultTextField extends StatefulWidget {
   final String label;
@@ -7,7 +8,6 @@ class DefaultTextField extends StatefulWidget {
   final String? errorText;
   final TextInputType? textInputType;
   final IconData icon;
-  final Color? color;
   final Function(String text) onChanged;
   final String? Function(String?)? validator;
   final bool obscureText;
@@ -20,7 +20,6 @@ class DefaultTextField extends StatefulWidget {
     this.errorText,
     this.initialValue,
     this.validator,
-    this.color = const Color(0xFF8B0000),
     this.obscureText = false,
     this.textInputType = TextInputType.text,
   }) : super(key: key);
@@ -40,6 +39,8 @@ class _DefaultTextFieldState extends State<DefaultTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = AppTheme.primaryColor; // 👈 usa tu color principal
+
     final textStyle = GoogleFonts.poppins(
       fontSize: 16,
       color: Colors.black87,
@@ -60,7 +61,7 @@ class _DefaultTextFieldState extends State<DefaultTextField> {
             decoration: InputDecoration(
               labelText: widget.label,
               labelStyle: GoogleFonts.poppins(
-                color: widget.color,
+                color: primary,
                 fontWeight: FontWeight.w500,
               ),
               hintText: "Escribe aquí...",
@@ -68,7 +69,7 @@ class _DefaultTextFieldState extends State<DefaultTextField> {
                 color: Colors.grey[400],
                 fontSize: 14,
               ),
-              prefixIcon: Icon(widget.icon, color: widget.color),
+              prefixIcon: Icon(widget.icon, color: primary),
               suffixIcon: widget.obscureText
                   ? IconButton(
                       icon: Icon(
@@ -90,11 +91,17 @@ class _DefaultTextFieldState extends State<DefaultTextField> {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: widget.color!.withOpacity(0.3), width: 1.2),
+                borderSide: BorderSide(
+                  color: primary.withOpacity(0.3),
+                  width: 1.2,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: widget.color!, width: 1.8),
+                borderSide: BorderSide(
+                  color: primary,
+                  width: 1.8,
+                ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),

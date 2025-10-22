@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ClientOrderDetailPage extends StatefulWidget {
   const ClientOrderDetailPage({super.key});
@@ -55,7 +56,13 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage> {
   Widget build(BuildContext context) {
     if (loading) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(
+          child: SpinKitThreeBounce(
+            color: Colors.orange,
+            size: 30,
+            duration: Duration(seconds: 1),
+          ),
+        ),
       );
     }
 
@@ -65,12 +72,14 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage> {
       );
     }
 
-    final formattedDate =
-        DateFormat('d MMM yyyy, h:mm a', 'es_MX').format(order!.createdAt);
+    final formattedDate = DateFormat(
+      'd MMM yyyy, h:mm a',
+      'es_MX',
+    ).format(order!.createdAt);
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      appBar: HomeAppBar( title: 'Detalles del Pedido'),
+      appBar: HomeAppBar(title: 'Detalles del Pedido'),
       body: Stack(
         children: [
           // ✅ CONTENIDO PRINCIPAL
@@ -82,8 +91,11 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage> {
                 // 🧾 Número del pedido
                 Row(
                   children: [
-                    const Icon(Icons.receipt_long_rounded,
-                        size: 22, color: Colors.deepOrange),
+                    const Icon(
+                      Icons.receipt_long_rounded,
+                      size: 22,
+                      color: Colors.deepOrange,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Pedido #${order!.id}',
@@ -101,8 +113,11 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage> {
                 // 🕒 Fecha
                 Row(
                   children: [
-                    const Icon(Icons.access_time_rounded,
-                        size: 16, color: Colors.grey),
+                    const Icon(
+                      Icons.access_time_rounded,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       'Realizado el $formattedDate',
@@ -118,16 +133,21 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage> {
 
                 // 🍽 Restaurante
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.storefront_rounded,
-                          color: Colors.orange, size: 20),
+                      const Icon(
+                        Icons.storefront_rounded,
+                        color: Colors.orange,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -179,23 +199,24 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage> {
 
                 // 🛒 Lista de productos
                 Expanded(
-                  child: order!.orderdetails.isNotEmpty
-                      ? ListView.builder(
-                          itemCount: order!.orderdetails.length,
-                          itemBuilder: (context, index) {
-                            final detail = order!.orderdetails[index];
-                            return ClientOrderDetailItem(detail: detail);
-                          },
-                        )
-                      : Center(
-                          child: Text(
-                            'No hay productos en este pedido',
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              color: Colors.grey,
+                  child:
+                      order!.orderdetails.isNotEmpty
+                          ? ListView.builder(
+                            itemCount: order!.orderdetails.length,
+                            itemBuilder: (context, index) {
+                              final detail = order!.orderdetails[index];
+                              return ClientOrderDetailItem(detail: detail);
+                            },
+                          )
+                          : Center(
+                            child: Text(
+                              'No hay productos en este pedido',
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
-                        ),
                 ),
               ],
             ),

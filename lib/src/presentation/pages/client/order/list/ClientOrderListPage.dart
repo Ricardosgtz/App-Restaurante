@@ -7,6 +7,7 @@ import 'package:flutter_application_1/src/presentation/pages/client/order/list/b
 import 'package:flutter_application_1/src/presentation/pages/client/order/list/bloc/ClientOrderListState.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ClientOrderListPage extends StatefulWidget {
   const ClientOrderListPage({super.key});
@@ -46,8 +47,20 @@ class _ClientOrderListPageState extends State<ClientOrderListPage> {
           builder: (context, state) {
             final responseState = state.response;
 
+            // 🌀 Loader animado de SpinKit
             if (responseState is Loading) {
-              return const Center(child: CircularProgressIndicator());
+              return Stack(
+                children: [
+                  Container(color: Colors.black.withOpacity(0.05)),
+                  const Center(
+                    child: SpinKitThreeBounce(
+                      color: Colors.orange,
+                      size: 30,
+                      duration: Duration(seconds: 1),
+                    ),
+                  ),
+                ],
+              );
             }
 
             if (responseState is Success<List<Order>>) {
@@ -60,11 +73,8 @@ class _ClientOrderListPageState extends State<ClientOrderListPage> {
               return RefreshIndicator(
                 color: Colors.orange,
                 onRefresh: () async {
-                  // 🔄 Refresca las órdenes del cliente
                   _bloc.add(const RefreshOrders());
-                  // Espera un momento para que se vea la animación del indicador
                   await Future.delayed(const Duration(seconds: 1));
-                  // 🧡 Muestra un pequeño mensaje al usuario
                   Fluttertoast.showToast(
                     msg: "Órdenes actualizadas correctamente",
                     toastLength: Toast.LENGTH_SHORT,
