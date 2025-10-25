@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/config/AppTheme.dart';
+import 'package:flutter_application_1/src/presentation/pages/auth/login/LoginPage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/home/bloc/ClientHomeBloc.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/home/bloc/ClientHomeEvent.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -54,7 +55,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                 bloc.add(Logout());
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => const MyApp()),
+                  MaterialPageRoute(builder: (_) => const MyApp(initialPage: LoginPage())),
                   (route) => false,
                 );
               },

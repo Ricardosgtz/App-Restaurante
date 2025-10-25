@@ -18,7 +18,7 @@ class ClientCategoryListBloc extends Bloc<ClientCategoryListEvent, ClientCategor
         response: Loading()
       )
     );
-    Resource response = await categoriesUseCases.getCategories.run();
+    Resource response = await categoriesUseCases.getCategories.run(event.context);
     emit(
       state.copyWith(
         response: response

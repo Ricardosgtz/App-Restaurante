@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 
 abstract class ClientCategoryListEvent extends Equatable {
   const ClientCategoryListEvent();
@@ -7,6 +8,11 @@ abstract class ClientCategoryListEvent extends Equatable {
 }
 
 class GetCategories extends ClientCategoryListEvent {
-  const GetCategories();
+  final BuildContext context;
+
+  const GetCategories(this.context);
+
+  @override
+  List<Object?> get props => [context];
 }
 

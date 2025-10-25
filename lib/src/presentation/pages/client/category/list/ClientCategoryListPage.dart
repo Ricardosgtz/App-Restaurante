@@ -17,19 +17,22 @@ class ClientCategoryListPage extends StatefulWidget {
 }
 
 class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
-  ClientCategoryListBloc? _bloc;
+  late ClientCategoryListBloc _bloc;
 
   @override
   void initState() {
     super.initState();
+    // ✅ Obtener el bloc correctamente
+    _bloc = BlocProvider.of<ClientCategoryListBloc>(context);
+
+    // ✅ Llamar al evento después del primer frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _bloc?.add(GetCategories());
+      _bloc.add(GetCategories(context));
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    _bloc = BlocProvider.of<ClientCategoryListBloc>(context);
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -37,10 +40,8 @@ class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
       body: BlocListener<ClientCategoryListBloc, ClientCategoryListState>(
         listener: (context, state) {
           final responseState = state.response;
-          if (responseState is Success) {
-            if (responseState.data is bool) {
-              _bloc?.add(GetCategories());
-            }
+          if (responseState is Success && responseState.data is bool) {
+            _bloc.add(GetCategories(context));
           }
           if (responseState is Error) {
             Fluttertoast.showToast(
@@ -69,10 +70,10 @@ class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
               return GridView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // 🟩 Dos columnas
+                  crossAxisCount: 2,
                   crossAxisSpacing: 14,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 0.60, // 🧩 Ajusta la proporción de alto/ancho
+                  childAspectRatio: 0.60,
                 ),
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
@@ -81,7 +82,7 @@ class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
               );
             }
 
-            // 🔄 Puedes poner aquí un loader bonito
+            // 🔄 Loader animado
             return const Center(
               child: SpinKitThreeBounce(
                 color: Colors.orange,

@@ -9,6 +9,7 @@ AuthResponse authResponseFromJson(String str) => AuthResponse.fromJson(json.deco
 String authResponseToJson(AuthResponse data) => json.encode(data.toJson());
 
 class AuthResponse {
+  
     Cliente cliente;
     String token;
 

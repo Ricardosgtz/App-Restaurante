@@ -59,14 +59,78 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
           builder: (context, state) {
             final responseState = state.response;
 
+            // 🔥 Mostrar loading solo cuando realmente está cargando
+            if (responseState is Loading) {
+              return const Center(
+                child: SpinKitThreeBounce(
+                  color: Colors.orange,
+                  size: 30,
+                  duration: Duration(seconds: 1),
+                ),
+              );
+            }
+
+            // 🔥 Si hay un error real, mostrarlo
+            if (responseState is Error) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 60,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Error al cargar direcciones',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        responseState.message,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          _bloc?.add(GetUserAddress());
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text('Reintentar'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            // 🔥 Si es Success, procesar las direcciones
             if (responseState is Success) {
               List<Address> addresses = responseState.data as List<Address>;
-              _bloc?.add(SetAddressSession(addressList: addresses));
-
-              if (addresses.isEmpty) {
-                return _buildEmptyState(context);
+              
+              if (addresses.isNotEmpty) {
+                _bloc?.add(SetAddressSession(addressList: addresses));
               }
 
+              // Si no hay direcciones, mostrar estado vacío
+              if (addresses.isEmpty) {
+                return _buildEmptyState(context, isSelectionMode);
+              }
+
+              // Si hay direcciones, mostrar la lista
               return Column(
                 children: [
                   Expanded(
@@ -207,79 +271,127 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
               );
             }
 
-            return const Center(
-              child: SpinKitThreeBounce(
-                  color: Colors.orange,
-                  size: 30,
-                  duration: Duration(seconds: 1),
-                ),
-            );
+            // 🔥 Estado inicial (antes de cargar) - Mostrar estado vacío
+            return _buildEmptyState(context, isSelectionMode);
           },
         ),
       ),
     );
   }
 
-  // 📭 Estado vacío elegante
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              CupertinoIcons.map_pin_ellipse,
-              color: AppTheme.primaryColor.withOpacity(0.8),
-              size: 70,
-            ),
-            const SizedBox(height: 18),
-            Text(
-              'Aún no tienes direcciones guardadas',
-              style: GoogleFonts.poppins(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
+  // 📭 Estado vacío elegante - MODIFICADO PARA SOPORTAR MODO SELECCIÓN
+  Widget _buildEmptyState(BuildContext context, bool isSelectionMode) {
+    return Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    CupertinoIcons.map_pin_ellipse,
+                    color: AppTheme.primaryColor.withOpacity(0.8),
+                    size: 70,
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    'Aún no tienes direcciones guardadas',
+                    style: GoogleFonts.poppins(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Agrega una dirección para poder recibir tus pedidos fácilmente.',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 30),
+                  // 🔥 Botón centrado cuando NO está en modo selección
+                  if (!isSelectionMode)
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pushNamed(context, 'client/address/create');
+                      },
+                      icon: const Icon(Icons.add_location_alt_rounded, size: 20),
+                      label: Text(
+                        'Agregar dirección',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14.5,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        elevation: 6,
+                      ),
+                    ),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 10),
-            Text(
-              'Agrega una dirección para poder recibir tus pedidos fácilmente.',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.grey[600],
-                height: 1.4,
-              ),
-              textAlign: TextAlign.center,
+          ),
+        ),
+        
+        // 🔥 BOTÓN DE AGREGAR EN MODO SELECCIÓN (cuando no hay direcciones)
+        if (isSelectionMode)
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 16,
             ),
-            const SizedBox(height: 30),
-            ElevatedButton.icon(
+            child: OutlinedButton.icon(
               onPressed: () {
-                Navigator.pushNamed(context, 'client/address/create');
+                Navigator.pushNamed(
+                  context,
+                  'client/address/create',
+                );
               },
-              icon: const Icon(Icons.add_location_alt_rounded, size: 20),
+              icon: Icon(
+                Icons.add_location_alt_rounded,
+                size: 20,
+                color: AppTheme.primaryColor,
+              ),
               label: Text(
                 'Agregar dirección',
                 style: GoogleFonts.poppins(
+                  fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  fontSize: 14.5,
+                  color: AppTheme.primaryColor,
+                  letterSpacing: 0.4,
                 ),
               ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.primaryColor,
+                side: BorderSide(
+                  color: AppTheme.primaryColor,
+                  width: 1.5,
+                ),
+                backgroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
-                elevation: 6,
+                shadowColor: Colors.grey.withOpacity(0.2),
+                elevation: 2,
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+      ],
     );
   }
 

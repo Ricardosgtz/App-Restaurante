@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/src/domain/repository/CategoriesRepository.dart';
 
 class GetCategoriesUseCase {
@@ -5,5 +6,5 @@ class GetCategoriesUseCase {
 
   GetCategoriesUseCase(this.categoriesRepository);
 
-  run() => categoriesRepository.getCategories();
+  run(BuildContext context) => categoriesRepository.getCategories(context);
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/injection.dart';
 import 'package:flutter_application_1/src/blocProviders.dart';
+import 'package:flutter_application_1/src/data/dataSource/local/SharedPref.dart';
+import 'package:flutter_application_1/src/domain/models/AuthResponse.dart';
+import 'package:flutter_application_1/src/domain/utils/TokenHelper.dart';
 import 'package:flutter_application_1/src/presentation/pages/auth/login/LoginPage.dart';
 import 'package:flutter_application_1/src/presentation/pages/auth/register/RegisterPage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/address/create/ClientAddressCreatePage.dart';
@@ -21,20 +24,40 @@ import 'package:intl/date_symbol_data_local.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
-
   await initializeDateFormatting('es_MX', null);
 
+  // 🔒 Verificar sesión guardada
+  final SharedPref sharedPref = SharedPref();
+  final data = await sharedPref.read('cliente');
 
-  runApp(const MyApp());
+  // Página inicial por defecto
+  Widget initialPage = LoginPage();
+
+  if (data != null) {
+    final authResponse = AuthResponse.fromJson(data);
+
+    // Verificar si el token sigue vigente
+    final tokenExpirado = TokenHelper.isTokenExpired(authResponse);
+
+    if (!tokenExpirado) {
+      // ✅ Token válido → ir a Home del cliente
+      initialPage = ClientHomePage();
+    } else {
+      // ⛔ Token expirado → eliminar sesión y redirigir a login
+      await sharedPref.remove('cliente');
+      initialPage = LoginPage();
+    }
+  }
+
+  runApp(MyApp(initialPage: initialPage));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Widget initialPage;
+  const MyApp({required this.initialPage, super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    
     return MultiBlocProvider(
       providers: blocProviders,
       child: MaterialApp(
@@ -45,7 +68,8 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        initialRoute: 'login',
+        // ✅ Pantalla inicial dinámica según token
+        home: initialPage,
         routes: {
           'login': (BuildContext context) => LoginPage(),
           'register': (BuildContext context) => RegisterPage(),
@@ -61,7 +85,7 @@ class MyApp extends StatelessWidget {
           'client/order/list': (BuildContext context) => const ClientOrderListPage(),
           'client/order/detail': (context) => const ClientOrderDetailPage(),
         },
-      ),  
+      ),
     );
   }
 }
