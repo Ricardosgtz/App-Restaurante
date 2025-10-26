@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/src/domain/repository/AddressRepository.dart';
 
 class GetUserAddressUseCase {
@@ -6,6 +7,6 @@ class GetUserAddressUseCase {
 
   GetUserAddressUseCase(this.addressRepository);
 
-  run(int idUser) => addressRepository.getUserAddress(idUser);
+  run(int idUser, BuildContext context) => addressRepository.getUserAddress(idUser, context);
 
 }

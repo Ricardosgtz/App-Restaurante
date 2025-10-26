@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/src/domain/repository/ProductsRepository.dart';
 
 class GetProductsByCategoryUseCase {
@@ -6,6 +7,6 @@ class GetProductsByCategoryUseCase {
 
   GetProductsByCategoryUseCase(this.productsRepository);
 
-  run(int idCategory) => productsRepository.getProductsByCategory(idCategory);
+  run(int idCategory, BuildContext context) => productsRepository.getProductsByCategory(idCategory, context);
 
 }

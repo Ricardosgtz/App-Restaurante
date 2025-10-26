@@ -27,7 +27,7 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       if (category != null) {
-        _bloc?.add(GetProductsByCategory(idCategory: category!.id!));
+        _bloc?.add(GetProductsByCategory(idCategory: category!.id!, context: context));
       }
     });
   }
@@ -44,7 +44,7 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
           final responseState = state.response;
           if (responseState is Success) {
             if (responseState.data is bool) {
-              _bloc?.add(GetProductsByCategory(idCategory: category!.id!));
+              _bloc?.add(GetProductsByCategory(idCategory: category!.id!, context: context));
             }
           } else if (responseState is Error) {
             Fluttertoast.showToast(
@@ -74,7 +74,7 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
                 color: Colors.orange,
                 onRefresh: () async {
                   // 🔄 Dispara el evento de refresco
-                  _bloc?.add(RefreshProducts(idCategory: category!.id!));
+                  _bloc?.add(RefreshProducts(idCategory: category!.id!, context: context));
                   await Future.delayed(const Duration(seconds: 1));
                   Fluttertoast.showToast(
                     msg: "Productos Actualizados",

@@ -63,6 +63,7 @@ class ProfileUpdateBloc extends Bloc<ProfileUpdateEvent, ProfileUpdateState> {
       state.id,
       state.toUser(),
       state.image,
+      event.context,
     );
     emit(state.copyWith(response: response, formKey: formKey));
   }

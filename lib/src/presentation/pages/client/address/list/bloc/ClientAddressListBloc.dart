@@ -29,7 +29,7 @@ class ClientAddressListBloc
     if (authResponse != null) {
       emit(state.copyWith(response: Loading()));
       Resource response = await addressUseCases.getUserAddress.run(
-        authResponse.cliente.id!,
+        authResponse.cliente.id!, event.context,
       );
       emit(state.copyWith(response: response));
     }
@@ -70,7 +70,7 @@ class ClientAddressListBloc
     Emitter<ClientAddressListState> emit,
   ) async {
     emit(state.copyWith(response: Loading()));
-    Resource response = await addressUseCases.delete.run(event.id);
+    Resource response = await addressUseCases.delete.run(event.id, event.context);
     emit(state.copyWith(response: response));
     Address? addressSession = await addressUseCases.getAddressSession.run();
     if (addressSession != null) {

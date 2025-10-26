@@ -20,7 +20,7 @@ class ClientProductListBloc
   ) async {
     emit(state.copyWith(response: Loading()));
     Resource response = await productsUseCases.getProductsByCategory.run(
-      event.idCategory,
+      event.idCategory, event.context,
     );
     emit(state.copyWith(response: response));
   }
@@ -31,7 +31,7 @@ class ClientProductListBloc
   ) async {
     // Mantén el estado actual, pero muestra un loading interno si quieres
     final response = await productsUseCases.getProductsByCategory.run(
-      event.idCategory,
+      event.idCategory, event.context
     );
     emit(state.copyWith(response: response));
   }

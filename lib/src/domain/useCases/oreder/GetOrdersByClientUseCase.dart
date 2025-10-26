@@ -1,4 +1,5 @@
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/src/domain/repository/OrdersRepository.dart';
 
 class GetOrdersByClientUseCase {
@@ -6,5 +7,5 @@ class GetOrdersByClientUseCase {
 
   GetOrdersByClientUseCase(this.ordersRepository);
 
-  run(int clientId) => ordersRepository.getOrdersByClient(clientId);
+  run(int clientId, BuildContext context) => ordersRepository.getOrdersByClient(clientId, context);
 }

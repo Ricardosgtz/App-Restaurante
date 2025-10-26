@@ -28,7 +28,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _bloc?.add(GetUserAddress());
+      _bloc?.add(GetUserAddress(context));
     });
   }
 
@@ -46,7 +46,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
         listener: (context, state) {
           final responseState = state.response;
           if (responseState is Success && responseState.data is bool) {
-            _bloc?.add(GetUserAddress());
+            _bloc?.add(GetUserAddress(context));
           }
           if (responseState is Error) {
             Fluttertoast.showToast(
@@ -103,7 +103,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
-                          _bloc?.add(GetUserAddress());
+                          _bloc?.add(GetUserAddress(context));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryColor,

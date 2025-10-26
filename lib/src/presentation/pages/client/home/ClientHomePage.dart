@@ -6,10 +6,10 @@ import 'package:flutter_application_1/src/presentation/pages/profile/info/Profil
 import 'package:flutter_application_1/src/presentation/pages/client/home/bloc/ClientHomeBloc.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/home/bloc/ClientHomeState.dart';
 import 'package:flutter_application_1/src/presentation/widgets/HomeAppBar.dart';
-import 'package:flutter_application_1/src/presentation/widgets/HomeFAB.dart';
 import 'package:flutter_application_1/src/presentation/widgets/HomeNavigationBar.dart';
+import 'package:flutter_application_1/src/presentation/pages/auth/login/LoginPage.dart';
+import 'package:flutter_application_1/main.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 class ClientHomePage extends StatelessWidget {
   const ClientHomePage({super.key});
@@ -23,29 +23,48 @@ class ClientHomePage extends StatelessWidget {
       ProfileInfoPage(),
     ];
 
-    final List<String> pageTitles = ['Categorías', 'Bolsa De Compras', 'Mis Ordenes', 'Perfil de Usuario'];
+    final List<String> pageTitles = [
+      'Categorías',
+      'Bolsa De Compras',
+      'Mis Ordenes',
+      'Perfil de Usuario'
+    ];
 
     final List<NavigationItem> navItems = [
       NavigationItem(icon: Icons.category_outlined, activeIcon: Icons.category, label: 'Categorías'),
-      NavigationItem(icon: Icons.shopping_bag, activeIcon: Icons. shopping_bag_outlined, label: 'Mi Bolsa'),
+      NavigationItem(icon: Icons.shopping_bag, activeIcon: Icons.shopping_bag_outlined, label: 'Mi Bolsa'),
       NavigationItem(icon: Icons.receipt_long_outlined, activeIcon: Icons.receipt_long, label: 'Mis Ordenes'),
       NavigationItem(icon: Icons.person_outline, activeIcon: Icons.person, label: 'Perfil'),
     ];
 
-    return BlocBuilder<ClientHomeBloc, ClientHomeState>(
-      builder: (context, state) {
-        return Scaffold(
-          resizeToAvoidBottomInset: false,
-          appBar: HomeAppBar(title: pageTitles[state.pageIndex]),
-          body: pages[state.pageIndex],
-          //floatingActionButton: const HomeFAB(),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-          bottomNavigationBar: HomeNavigationBar(
-            selectedIndex: state.pageIndex,
-            items: navItems,
-          ),
-        );
+    return BlocListener<ClientHomeBloc, ClientHomeState>(
+      listenWhen: (previous, current) =>
+          current.isLoggedOut != previous.isLoggedOut,
+      listener: (context, state) {
+        if (state.isLoggedOut) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (_) => const MyApp(initialPage: LoginPage())),
+            (route) => false,
+          );
+        }
       },
+      child: BlocBuilder<ClientHomeBloc, ClientHomeState>(
+        builder: (context, state) {
+          return Scaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: HomeAppBar(title: pageTitles[state.pageIndex]),
+            body: pages[state.pageIndex],
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+            bottomNavigationBar: HomeNavigationBar(
+              selectedIndex: state.pageIndex,
+              items: navItems,
+            ),
+          );
+        },
+      ),
     );
   }
 }

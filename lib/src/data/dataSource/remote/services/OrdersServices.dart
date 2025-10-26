@@ -1,41 +1,69 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/data/api/ApiConfig.dart';
+import 'package:flutter_application_1/src/data/dataSource/local/SharedPref.dart';
+import 'package:flutter_application_1/src/domain/models/AuthResponse.dart';
 import 'package:flutter_application_1/src/domain/models/Order.dart';
+import 'package:flutter_application_1/src/domain/utils/AuthExpiredHandler.dart';
 import 'package:flutter_application_1/src/domain/utils/ListToString.dart';
 import 'package:flutter_application_1/src/domain/utils/Resource.dart';
+import 'package:flutter_application_1/src/domain/utils/TokenHelper.dart';
 import 'package:http/http.dart' as http;
 
 class OrdersService {
-  Future<String> token;
+  final SharedPref _sharedPref = SharedPref();
 
-  OrdersService(this.token);
+  OrdersService(); // ✅ Sin parámetros
+
+  /// 🔑 Obtener token fresco
+  Future<String?> _getToken() async {
+    try {
+      final data = await _sharedPref.read('cliente');
+      if (data != null) {
+        final authResponse = AuthResponse.fromJson(data);
+        if (!TokenHelper.isTokenExpired(authResponse)) {
+          return authResponse.token;
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Error obteniendo token: $e');
+      return null;
+    }
+  }
 
   /// Obtiene todas las órdenes de un cliente específico
-  Future<Resource<List<Order>>> getOrdersByClient(int clientId) async {
+  Future<Resource<List<Order>>> getOrdersByClient(int clientId, BuildContext context) async {
     try {
+      final tokenValue = await _getToken();
+      
+      if (tokenValue == null) {
+        if (context.mounted) {
+          await AuthExpiredHandler.handleUnauthorized(context);
+        }
+        return Error("Sesión expirada");
+      }
+
       Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/orders/client/$clientId');
       Map<String, String> headers = {
         "Content-Type": "application/json",
-        "Authorization": await token,
+        "Authorization": tokenValue,
       };
 
       final response = await http.get(url, headers: headers);
       final data = json.decode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // ✅ Verifica si la respuesta tiene el campo "data" o si es una lista directamente
-        final list =
-            (data is List)
-                ? data
-                : (data['data'] ??
-                    []); // si viene dentro de data, lo toma; si no, lista vacía
-
-        List<Order> orders =
-            (list as List)
-                .map((item) => Order.fromJson(item as Map<String, dynamic>))
-                .toList();
-
+        final list = (data is List) ? data : (data['data'] ?? []);
+        List<Order> orders = (list as List)
+            .map((item) => Order.fromJson(item as Map<String, dynamic>))
+            .toList();
         return Success(orders);
+      } else if (response.statusCode == 401) {
+        if (context.mounted) {
+          await AuthExpiredHandler.handleUnauthorized(context);
+        }
+        return Error("Sesión expirada");
       } else {
         return Error(ListToString(data['message'] ?? 'Error desconocido'));
       }
@@ -46,12 +74,21 @@ class OrdersService {
   }
 
   /// Obtiene el detalle completo de una orden específica
-  Future<Resource<Order>> getOrderDetail(int orderId) async {
+  Future<Resource<Order>> getOrderDetail(int orderId, BuildContext context) async {
     try {
+      final tokenValue = await _getToken();
+      
+      if (tokenValue == null) {
+        if (context.mounted) {
+          await AuthExpiredHandler.handleUnauthorized(context);
+        }
+        return Error("Sesión expirada");
+      }
+
       Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/orders/$orderId');
       Map<String, String> headers = {
         "Content-Type": "application/json",
-        "Authorization": await token,
+        "Authorization": tokenValue,
       };
 
       final response = await http.get(url, headers: headers);
@@ -60,6 +97,11 @@ class OrdersService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         Order order = Order.fromJson(data);
         return Success(order);
+      } else if (response.statusCode == 401) {
+        if (context.mounted) {
+          await AuthExpiredHandler.handleUnauthorized(context);
+        }
+        return Error("Sesión expirada");
       } else {
         return Error(ListToString(data['message']));
       }
@@ -78,15 +120,24 @@ class OrdersService {
     required String orderType,
     String? note,
     required List<Map<String, dynamic>> items,
+    required BuildContext? context,
   }) async {
     try {
+      final tokenValue = await _getToken();
+      
+      if (tokenValue == null) {
+        if (context!.mounted) {
+          await AuthExpiredHandler.handleUnauthorized(context);
+        }
+        return Error("Sesión expirada");
+      }
+
       Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/orders');
       Map<String, String> headers = {
         "Content-Type": "application/json",
-        "Authorization": await token,
+        "Authorization": tokenValue,
       };
 
-      // Construir el body de la solicitud
       Map<String, dynamic> body = {
         "client": clientId,
         "restaurant": restaurantId,
@@ -96,7 +147,6 @@ class OrdersService {
         "items": items,
       };
 
-      // Agregar address solo si es domicilio y existe
       if (orderType == "domicilio" && addressId != null) {
         body["address"] = addressId;
       }
@@ -112,6 +162,11 @@ class OrdersService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         Order order = Order.fromJson(data);
         return Success(order);
+      } else if (response.statusCode == 401) {
+        if (context!.mounted) {
+          await AuthExpiredHandler.handleUnauthorized(context);
+        }
+        return Error("Sesión expirada");
       } else {
         return Error(ListToString(data['message']));
       }

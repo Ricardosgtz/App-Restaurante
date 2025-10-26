@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/src/data/dataSource/local/SharedPref.dart';
 import 'package:flutter_application_1/src/data/dataSource/remote/services/AddressServices.dart';
 import 'package:flutter_application_1/src/domain/models/Address.dart';
@@ -12,13 +13,13 @@ class AddressRepositoryImpl implements AddressRepository {
   AddressRepositoryImpl(this.addressServices, this.sharedPref);
 
   @override
-  Future<Resource<Address>> create(Address address) {
-    return addressServices.create(address);
+  Future<Resource<Address>> create(Address address, BuildContext context) {
+    return addressServices.create(address, context);
   }
   
   @override
-  Future<Resource<List<Address>>> getUserAddress(int idUser) {
-    return addressServices.getUserAddress(idUser);
+  Future<Resource<List<Address>>> getUserAddress(int idUser, BuildContext context) {
+    return addressServices.getUserAddress(idUser, context);
   }
   
   @override
@@ -37,8 +38,8 @@ class AddressRepositoryImpl implements AddressRepository {
   }
   
   @override
-  Future<Resource<bool>> delete(int id) {
-    return addressServices.delete(id);
+  Future<Resource<bool>> delete(int id, BuildContext context) {
+    return addressServices.delete(id, context);
   }
   
   @override

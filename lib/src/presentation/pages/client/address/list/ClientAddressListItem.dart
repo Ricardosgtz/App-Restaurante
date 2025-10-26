@@ -127,7 +127,7 @@ class ClientAddressListItem extends StatelessWidget {
                 right: 10,
                 child: GestureDetector(
                   onTap: () {
-                    bloc?.add(DeleteAddress(id: address.id!));
+                    bloc?.add(DeleteAddress(id: address.id!, context: context));
                   },
                   child: Container(
                     padding: const EdgeInsets.all(6),

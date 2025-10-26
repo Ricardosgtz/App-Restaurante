@@ -1,27 +1,60 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/data/api/ApiConfig.dart';
+import 'package:flutter_application_1/src/data/dataSource/local/SharedPref.dart';
+import 'package:flutter_application_1/src/domain/models/AuthResponse.dart';
 import 'package:flutter_application_1/src/domain/models/Cliente.dart';
+import 'package:flutter_application_1/src/domain/utils/AuthExpiredHandler.dart';
 import 'package:flutter_application_1/src/domain/utils/ListToString.dart';
 import 'package:flutter_application_1/src/domain/utils/Resource.dart';
+import 'package:flutter_application_1/src/domain/utils/TokenHelper.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart';
 
 class UsersService {
-  Future<String> token;
+  final SharedPref _sharedPref = SharedPref();
 
-  UsersService(this.token);
+  UsersService(); // ✅ Sin parámetros
 
-  Future<Resource<Cliente>> update(int id, Cliente cliente) async {
+  /// 🔑 Obtener token fresco
+  Future<String?> _getToken() async {
     try {
+      final data = await _sharedPref.read('cliente');
+      if (data != null) {
+        final authResponse = AuthResponse.fromJson(data);
+        if (!TokenHelper.isTokenExpired(authResponse)) {
+          return authResponse.token;
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Error obteniendo token: $e');
+      return null;
+    }
+  }
+
+  Future<Resource<Cliente>> update(
+    int id,
+    Cliente cliente,
+    BuildContext context,
+  ) async {
+    try {
+      final tokenValue = await _getToken();
+      
+      if (tokenValue == null) {
+        if (context.mounted) {
+          await AuthExpiredHandler.handleUnauthorized(context);
+        }
+        return Error("Sesión expirada");
+      }
+
       print('METODO ACTUALIZAR SIN IMAGEN');
-      // http://192.168.80.13:3000/users/5
       Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/clients/$id');
       Map<String, String> headers = {
         "Content-Type": "application/json",
-        "Authorization": await token,
+        "Authorization": tokenValue,
       };
       String body = json.encode({
         'name': cliente.name,
@@ -30,11 +63,16 @@ class UsersService {
       });
       final response = await http.put(url, headers: headers, body: body);
       final data = json.decode(response.body);
+      
       if (response.statusCode == 200 || response.statusCode == 201) {
         Cliente userResponse = Cliente.fromJson(data);
         return Success(userResponse);
+      } else if (response.statusCode == 401) {
+        if (context.mounted) {
+          await AuthExpiredHandler.handleUnauthorized(context);
+        }
+        return Error("Sesión expirada");
       } else {
-        // ERROR
         return Error(ListToString(data['message']));
       }
     } catch (e) {
@@ -47,14 +85,23 @@ class UsersService {
     int id,
     Cliente cliente,
     File file,
+    BuildContext context,
   ) async {
     try {
+      final tokenValue = await _getToken();
+      
+      if (tokenValue == null) {
+        if (context.mounted) {
+          await AuthExpiredHandler.handleUnauthorized(context);
+        }
+        return Error("Sesión expirada");
+      }
+
       print('📤 METODO ACTUALIZAR CON IMAGEN');
-      // 🔗 Usa tu dominio render
       Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/clients/upload/$id');
 
       final request = http.MultipartRequest('PUT', url);
-      request.headers['Authorization'] = await token;
+      request.headers['Authorization'] = tokenValue;
 
       // 🖼️ Archivo de imagen
       request.files.add(
@@ -75,16 +122,19 @@ class UsersService {
       // 🚀 Enviar
       final response = await request.send();
       print('🔁 RESPONSE STATUS: ${response.statusCode}');
-      final responseString =
-          await response.stream.transform(utf8.decoder).join();
+      final responseString = await response.stream.transform(utf8.decoder).join();
       print('🔁 RESPONSE BODY: $responseString');
 
-      // 📦 Intentar decodificar JSON
       final data = json.decode(responseString);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         Cliente userResponse = Cliente.fromJson(data);
         return Success(userResponse);
+      } else if (response.statusCode == 401) {
+        if (context.mounted) {
+          await AuthExpiredHandler.handleUnauthorized(context);
+        }
+        return Error("Sesión expirada");
       } else {
         return Error(ListToString(data['message']));
       }

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 
 /// 🔹 Eventos para la lista de productos del cliente
 abstract class ClientProductListEvent extends Equatable {
@@ -11,8 +12,9 @@ abstract class ClientProductListEvent extends Equatable {
 /// ✅ Obtener los productos según la categoría
 class GetProductsByCategory extends ClientProductListEvent {
   final int idCategory;
+  final BuildContext context;
 
-  const GetProductsByCategory({required this.idCategory});
+  const GetProductsByCategory({required this.idCategory, required this.context});
 
   @override
   List<Object?> get props => [idCategory];
@@ -21,8 +23,8 @@ class GetProductsByCategory extends ClientProductListEvent {
 /// 🔄 Refrescar los productos de una categoría sin mostrar loading completo
 class RefreshProducts extends ClientProductListEvent {
   final int idCategory;
-
-  const RefreshProducts({required this.idCategory});
+final BuildContext context;
+  const RefreshProducts({required this.idCategory,  required this.context});
 
   @override
   List<Object?> get props => [idCategory];

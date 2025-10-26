@@ -278,7 +278,7 @@ class _ProfileUpdateContentState extends State<ProfileUpdateContent> {
           });
 
           if (widget.state.formKey!.currentState!.validate()) {
-            widget.bloc?.add(ProfileUpdateFormSubmit());
+            widget.bloc?.add(ProfileUpdateFormSubmit(context));
           }
         },
         icon: const Icon(

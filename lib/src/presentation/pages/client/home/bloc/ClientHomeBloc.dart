@@ -22,6 +22,7 @@ class ClientHomeBloc extends Bloc<ClientHomeEvent, ClientHomeState> {
 
   Future<void> _onLogout(Logout event, Emitter<ClientHomeState> emit) async {
     await authUseCases.logout.run();
+     emit(state.copyWith(isLoggedOut: true));
   }
 
 }

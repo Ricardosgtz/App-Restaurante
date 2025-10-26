@@ -31,7 +31,7 @@ class _ClientAddressCreatePageState extends State<ClientAddressCreatePage> {
 
           if (responseState is Success) {
             // Actualiza la lista de direcciones
-            context.read<ClientAddressListBloc>().add(GetUserAddress());
+            context.read<ClientAddressListBloc>().add(GetUserAddress(context));
 
             // Muestra AlertDialog de éxito
             await AlertHelper.showAlertDialog(

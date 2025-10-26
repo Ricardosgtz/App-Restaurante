@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 
 /// 🔹 Eventos para la lista de órdenes del cliente
 abstract class ClientOrderListEvent extends Equatable {
@@ -10,10 +11,12 @@ abstract class ClientOrderListEvent extends Equatable {
 
 /// ✅ Obtener todas las órdenes del cliente autenticado
 class GetOrders extends ClientOrderListEvent {
-  const GetOrders();
+  final BuildContext context;
+  const GetOrders(this.context);
 }
 
 /// 🔄 Refrescar las órdenes (sin mostrar loading completo)
 class RefreshOrders extends ClientOrderListEvent {
-  const RefreshOrders();
+  final BuildContext context;
+  const RefreshOrders(this.context);
 }

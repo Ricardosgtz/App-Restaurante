@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/domain/models/AuthResponse.dart';
 import 'package:flutter_application_1/src/domain/useCases/address/AddressUseCases.dart';
@@ -20,7 +19,6 @@ class ClientAddressCreateBloc extends Bloc<ClientAddressCreateEvent, ClientAddre
     on<AddressChanged>(_onAddressChanged);
     on<ReferenceChanged>(_onReferenceChanged);
     on<FormSubmit>(_onFormSubmit);
-
   }
 
   final formKey = GlobalKey<FormState>();
@@ -53,6 +51,7 @@ class ClientAddressCreateBloc extends Bloc<ClientAddressCreateEvent, ClientAddre
       )
     );
   }
+
   Future<void> _onAddressChanged(AddressChanged event, Emitter<ClientAddressCreateState> emit) async {
     emit(
       state.copyWith(
@@ -77,6 +76,7 @@ class ClientAddressCreateBloc extends Bloc<ClientAddressCreateEvent, ClientAddre
     );
   }
 
+  // ✅ SOLUCIÓN: Obtener el usuario ACTUAL antes de crear la dirección
   Future<void> _onFormSubmit(FormSubmit event, Emitter<ClientAddressCreateState> emit) async {
     emit(
       state.copyWith(
@@ -84,13 +84,41 @@ class ClientAddressCreateBloc extends Bloc<ClientAddressCreateEvent, ClientAddre
         formKey: formKey
       )
     );
-    Resource response = await addressUseCases.create.run(state.toAddress());
+    
+    // 🔥 CRÍTICO: Obtener la sesión ACTUAL del usuario
+    AuthResponse? authResponse = await authUseCases.getUserSession.run();
+    
+    // Validar que exista una sesión activa
+    if (authResponse == null) {
+      emit(
+        state.copyWith(
+          response: Error('No hay sesión activa. Por favor inicia sesión nuevamente.'),
+          formKey: formKey
+        )
+      );
+      return;
+    }
+    
+    // 🔥 Actualizar el idClient con el ID del usuario ACTUAL
+    final updatedState = state.copyWith(
+      idClient: authResponse.cliente.id,
+      formKey: formKey
+    );
+    
+    // Debug (opcional - puedes eliminarlo después)
+    print('🔍 DEBUG - Usuario actual: ${authResponse.cliente.name}');
+    print('🔍 DEBUG - ID Cliente: ${authResponse.cliente.id}');
+    print('🔍 DEBUG - Dirección a crear: ${updatedState.toAddress()}');
+    
+    // Crear la dirección con el ID correcto
+    Resource response = await addressUseCases.create.run(updatedState.toAddress(), event.context);
+    
     emit(
       state.copyWith(
         response: response,
+        idClient: authResponse.cliente.id, // Mantener el ID actualizado
         formKey: formKey
       )
     );  
   }
-
 }

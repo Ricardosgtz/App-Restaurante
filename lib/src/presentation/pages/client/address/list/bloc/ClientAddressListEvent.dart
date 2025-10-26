@@ -1,5 +1,6 @@
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/src/domain/models/Address.dart';
 
 
@@ -10,7 +11,8 @@ abstract class ClientAddressListEvent extends Equatable {
 }
 
 class GetUserAddress extends ClientAddressListEvent {
-  const GetUserAddress();
+  final BuildContext context;
+  const GetUserAddress(this.context);
 }
 
 class ChangeRadioValue extends ClientAddressListEvent {
@@ -34,7 +36,8 @@ class SetAddressSession extends ClientAddressListEvent {
 
 class DeleteAddress extends ClientAddressListEvent {
   final int id;
-  const DeleteAddress({required this.id});
+  final BuildContext context;
+  const DeleteAddress({required this.id, required this.context});
   @override
   List<Object?> get props => [id];
 }

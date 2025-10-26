@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/src/domain/models/Cliente.dart';
 import 'package:flutter_application_1/src/presentation/utils/BlocFormItem.dart';
 
@@ -46,7 +47,8 @@ class ProfileUpdatePhoneChanged extends ProfileUpdateEvent {
 }
 
 class ProfileUpdateFormSubmit extends ProfileUpdateEvent {
-  const ProfileUpdateFormSubmit();
+  final BuildContext context;
+  const ProfileUpdateFormSubmit(this.context);
 }
 
 class ProfileUpdatePickImage extends ProfileUpdateEvent {

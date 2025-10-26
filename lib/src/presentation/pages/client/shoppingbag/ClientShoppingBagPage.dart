@@ -113,9 +113,9 @@ class _ClientShoppingBagPageState extends State<ClientShoppingBagPage> {
     try {
       final authResponse = await _bloc!.authUseCases.getUserSession.run();
       final clientId = authResponse!.cliente.id!;
-      final token = authResponse.token;
+      //final token = authResponse.token;
 
-      final ordersService = OrdersService(Future.value(token));
+      final ordersService = OrdersService();
 
       List<Map<String, dynamic>> items = state.products.map((product) {
         return {
@@ -127,6 +127,7 @@ class _ClientShoppingBagPageState extends State<ClientShoppingBagPage> {
 
       final response = await ordersService.createOrder(
         clientId: clientId,
+        context: context,
         restaurantId: 1,
         statusId: 1,
         addressId: selectedAddressId,

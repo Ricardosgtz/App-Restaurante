@@ -68,15 +68,15 @@ abstract class AppModule {
   }
 
   @injectable
-  UsersService get usersService => UsersService(token);
+  UsersService get usersService => UsersService();
   @injectable
-  CategoriesService get categoriesService => CategoriesService(token);
+  CategoriesService get categoriesService => CategoriesService();
   @injectable
-  ProductsService get productsService => ProductsService(token);
+  ProductsService get productsService => ProductsService();
   @injectable
-  AddressServices get addressService => AddressServices(token);
+  AddressServices get addressService => AddressServices();
   @injectable
-  OrdersService get ordersService => OrdersService(token);
+  OrdersService get ordersService => OrdersService();
   @injectable
   SharedPref get sharedPref => SharedPref(); //podremos ingestar el este objeto donde queramos
   @injectable

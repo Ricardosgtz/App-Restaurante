@@ -36,7 +36,7 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage> {
 
   Future<void> _loadOrderDetail(int orderId) async {
     setState(() => loading = true);
-    final response = await _ordersUseCases.getOrderDetail.run(orderId);
+    final response = await _ordersUseCases.getOrderDetail.run(orderId, context);
 
     if (response is Success<Order>) {
       setState(() {

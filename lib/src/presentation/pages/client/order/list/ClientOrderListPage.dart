@@ -23,7 +23,7 @@ class _ClientOrderListPageState extends State<ClientOrderListPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _bloc.add(const GetOrders());
+      _bloc.add(GetOrders(context));
     });
   }
 
@@ -73,7 +73,7 @@ class _ClientOrderListPageState extends State<ClientOrderListPage> {
               return RefreshIndicator(
                 color: Colors.orange,
                 onRefresh: () async {
-                  _bloc.add(const RefreshOrders());
+                  _bloc.add(RefreshOrders(context));
                   await Future.delayed(const Duration(seconds: 1));
                   Fluttertoast.showToast(
                     msg: "Órdenes actualizadas correctamente",

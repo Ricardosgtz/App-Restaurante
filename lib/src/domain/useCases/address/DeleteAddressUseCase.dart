@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/src/domain/repository/AddressRepository.dart';
 
 class DeleteAddressUseCase {
@@ -6,6 +7,6 @@ class DeleteAddressUseCase {
 
   DeleteAddressUseCase(this.addressRepository);
 
-  run(int id) => addressRepository.delete(id);
+  run(int id, BuildContext context) => addressRepository.delete(id, context);
 
 }

@@ -1,5 +1,6 @@
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/src/presentation/utils/BlocFormItem.dart';
 
 abstract class ClientAddressCreateEvent extends Equatable {
@@ -35,5 +36,7 @@ class ReferenceChanged extends ClientAddressCreateEvent {
 }
 
 class FormSubmit extends ClientAddressCreateEvent {
-  const FormSubmit();
+  final BuildContext context;
+
+  FormSubmit(this.context);
 }

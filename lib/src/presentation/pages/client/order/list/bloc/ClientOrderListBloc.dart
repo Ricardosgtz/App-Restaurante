@@ -30,7 +30,7 @@ class ClientOrderListBloc extends Bloc<ClientOrderListEvent, ClientOrderListStat
       final int clientId = authResponse.cliente.id!;
 
       // ✅ 2. Consultar órdenes del cliente
-      final Resource response = await ordersUseCases.getOrdersByClient.run(clientId);
+      final Resource response = await ordersUseCases.getOrdersByClient.run(clientId, event.context);
 
       // ✅ 3. Emitir resultado
       emit(state.copyWith(response: response));
@@ -49,7 +49,7 @@ class ClientOrderListBloc extends Bloc<ClientOrderListEvent, ClientOrderListStat
       final AuthResponse authResponse = await authUseCases.getUserSession.run();
       final int clientId = authResponse.cliente.id!;
 
-      final Resource response = await ordersUseCases.getOrdersByClient.run(clientId);
+      final Resource response = await ordersUseCases.getOrdersByClient.run(clientId, event.context);
 
       emit(state.copyWith(response: response));
     } catch (e) {
