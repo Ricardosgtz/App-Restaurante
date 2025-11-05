@@ -1,9 +1,9 @@
+// lib/src/data/repository/PaymentsRepositoryImpl.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/data/dataSource/remote/services/PaymentsService.dart';
 import 'package:flutter_application_1/src/domain/models/Payment.dart';
 import 'package:flutter_application_1/src/domain/repository/PaymentsRepository.dart';
 import 'package:flutter_application_1/src/domain/utils/Resource.dart';
-import 'package:injectable/injectable.dart';
 
 class PaymentsRepositoryImpl implements PaymentsRepository {
   final PaymentsService service;
@@ -24,5 +24,16 @@ class PaymentsRepositoryImpl implements PaymentsRepository {
       context: context,
     );
   }
-}
 
+  // 🆕 Nuevo método
+  @override
+  Future<Resource<Payment?>> getPaymentByOrderId({
+    required int orderId,
+    required BuildContext context,
+  }) {
+    return service.getPaymentByOrderId(
+      orderId: orderId,
+      context: context,
+    );
+  }
+}

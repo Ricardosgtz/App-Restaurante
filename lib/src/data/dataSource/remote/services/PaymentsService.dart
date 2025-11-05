@@ -68,4 +68,61 @@ class PaymentsService extends BaseService {
       return Error("Error al crear el pago: $e");
     }
   }
+
+  /// 📋 Obtener pago por order_id
+  Future<Resource<Payment?>> getPaymentByOrderId({
+    required int orderId,
+    required BuildContext context,
+  }) async {
+    try {
+      // 🔑 Validar token antes de enviar
+      final tokenValue = await validateAndGetToken(context);
+      if (tokenValue == null) {
+        return Error("Tu sesión ha expirado. Inicia sesión nuevamente.");
+      }
+
+      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/payments/order/$orderId/');
+      final headers = await getAuthHeaders();
+
+      print('🔍 Solicitando pago para order_id: $orderId');
+      print('🔍 URL: $url');
+
+      final response = await http.get(url, headers: headers);
+
+      print('📋 Response status: ${response.statusCode}');
+      print('📋 Response body: ${response.body}');
+
+      // Si el pago no existe (404), retornar Success con null
+      if (response.statusCode == 404) {
+        print('⚠️ No se encontró pago para la orden $orderId');
+        return Success(null);
+      }
+
+      return handleResponse<Payment?>(
+        response: response,
+        context: context,
+        onSuccess: (data) {
+          // El backend devuelve {"message": "...", "statusCode": 200, "data": {...}}
+          if (data == null || data['data'] == null) {
+            print('⚠️ No hay data en la respuesta');
+            return null;
+          }
+          
+          try {
+            Payment payment = Payment.fromJson(data['data']);
+            print('💰 Pago obtenido correctamente: ID ${payment.id}, Status: ${payment.status}');
+            return payment;
+          } catch (e) {
+            print('❌ Error al parsear Payment: $e');
+            return null;
+          }
+        },
+      );
+    } catch (e) {
+      print('❌ Error en getPaymentByOrderId: $e');
+      return Error("Error al obtener el pago: $e");
+    }
+  }
 }
+
+

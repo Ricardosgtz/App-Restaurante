@@ -49,6 +49,7 @@ import 'package:flutter_application_1/src/domain/useCases/oreder/GetOrderDetailU
 import 'package:flutter_application_1/src/domain/useCases/oreder/GetOrdersByClientUseCase.dart';
 import 'package:flutter_application_1/src/domain/useCases/oreder/OrdersUseCases.dart';
 import 'package:flutter_application_1/src/domain/useCases/payments/CreatePaymentUseCase.dart';
+import 'package:flutter_application_1/src/domain/useCases/payments/GetPaymentByOrderIdUseCase.dart';
 import 'package:flutter_application_1/src/domain/useCases/payments/PaymentsUseCases.dart';
 import 'package:flutter_application_1/src/domain/useCases/products/GetProductsByCategoryUseCase.dart';
 import 'package:flutter_application_1/src/domain/useCases/products/ProductsUseCases.dart';
@@ -85,24 +86,29 @@ abstract class AppModule {
   @injectable
   SharedPref get sharedPref => SharedPref(); //podremos ingestar el este objeto donde queramos
   @injectable
-  AuthRepository get authRepository => AuthRepositoryImpl(authService, sharedPref);
+  AuthRepository get authRepository =>
+      AuthRepositoryImpl(authService, sharedPref);
   @injectable
   UsersRepository get usersRepository => UsersRepositoryImpl(usersService);
   @injectable
-  CategoriesRepository get categoriesRepository => CategoriesRepositoryImpl(categoriesService);
+  CategoriesRepository get categoriesRepository =>
+      CategoriesRepositoryImpl(categoriesService);
   @injectable
-  ProductsRepository get productsRepository => ProductsRepositoryImpl(productsService);
+  ProductsRepository get productsRepository =>
+      ProductsRepositoryImpl(productsService);
   @injectable
-  ShoppingBagRepository get shoppingBagRepository => ShoppingBagRepositoryImpl(sharedPref);
+  ShoppingBagRepository get shoppingBagRepository =>
+      ShoppingBagRepositoryImpl(sharedPref);
   @injectable
-  AddressRepository get addressRepository => AddressRepositoryImpl(addressService, sharedPref);
+  AddressRepository get addressRepository =>
+      AddressRepositoryImpl(addressService, sharedPref);
   @injectable
   OrdersRepository get ordersRepository => OrdersRepositoryImpl(ordersService);
   @injectable
   PaymentsService get paymentsService => PaymentsService();
   @injectable
-  PaymentsRepository get paymentsRepository => PaymentsRepositoryImpl(paymentsService);
-
+  PaymentsRepository get paymentsRepository =>
+      PaymentsRepositoryImpl(paymentsService);
 
   @injectable
   AuthUseCases get authUserCases => AuthUseCases(
@@ -133,17 +139,17 @@ abstract class AppModule {
     getProducts: GetProductsShoppingBagUseCase(shoppingBagRepository),
     deleteItem: DeleteItemShoppingBagUseCase(shoppingBagRepository),
     deleteShoppingBag: DeleteShoppingBagUseCase(shoppingBagRepository),
-    getTotal: GetTotalShoppingBagUseCase(shoppingBagRepository)
+    getTotal: GetTotalShoppingBagUseCase(shoppingBagRepository),
   );
 
-    @injectable
+  @injectable
   AddressUseCases get addressUseCases => AddressUseCases(
     create: CreateAddressUseCase(addressRepository),
     getUserAddress: GetUserAddressUseCase(addressRepository),
     saveAddressInSession: SaveAddressInSessionUseCase(addressRepository),
     getAddressSession: GetAddressSessionUseCase(addressRepository),
     delete: DeleteAddressUseCase(addressRepository),
-    deleteFromSession: DeleteAddressFromSessionUseCase(addressRepository)
+    deleteFromSession: DeleteAddressFromSessionUseCase(addressRepository),
   );
 
   @injectable
@@ -156,6 +162,8 @@ abstract class AppModule {
   @injectable
   PaymentsUseCases get paymentsUseCases => PaymentsUseCases(
     createPayment: CreatePaymentUseCase(paymentsRepository),
+    getPaymentByOrderId: GetPaymentByOrderIdUseCase(
+      paymentsRepository,
+    ), 
   );
-
 }

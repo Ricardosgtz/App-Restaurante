@@ -68,10 +68,12 @@ class ClientOrderDetailBottom extends StatelessWidget {
     switch (status) {
       case 'pendiente':
         return StatusInfo(Colors.orangeAccent, Icons.schedule);
+      case 'en proceso':
+        return StatusInfo(Colors.amber, Icons.coffee_rounded);
       case 'confirmada':
         return StatusInfo(Colors.blueAccent, Icons.verified);
       case 'enviada':
-        return StatusInfo(Colors.purpleAccent, Icons.local_shipping);
+        return StatusInfo(Colors.deepPurpleAccent, Icons.local_shipping);
       case 'entregada':
         return StatusInfo(Colors.green, Icons.check_circle);
       case 'cancelada':
