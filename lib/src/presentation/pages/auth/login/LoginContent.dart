@@ -6,13 +6,54 @@ import 'package:flutter_application_1/src/presentation/pages/auth/login/bloc/Log
 import 'package:flutter_application_1/src/presentation/pages/auth/login/bloc/LoginState.dart';
 import 'package:flutter_application_1/src/presentation/utils/BlocFormItem.dart';
 import 'package:flutter_application_1/src/presentation/widgets/DefaultTextField.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
-class LoginContent extends StatelessWidget {
+class LoginContent extends StatefulWidget {
   final LoginBloc? bloc;
   final LoginState state;
 
   const LoginContent(this.bloc, this.state, {Key? key}) : super(key: key);
+
+  @override
+  State<LoginContent> createState() => _LoginContentState();
+}
+
+class _LoginContentState extends State<LoginContent>
+    with SingleTickerProviderStateMixin {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _emailController.clear();
+    _passwordController.clear();
+
+    // ⚡ Animación de entrada
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+
+    _scaleAnimation =
+        CurvedAnimation(parent: _animationController, curve: Curves.elasticOut);
+    _fadeAnimation =
+        CurvedAnimation(parent: _animationController, curve: Curves.easeIn);
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,81 +65,78 @@ class LoginContent extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.only(
-            left: 40,
-            right: 40,
-            top: 90,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            left: 45,
+            right: 45,
+            top: 120,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 30,
           ),
           child: Form(
-            key: state.formkey, // ✅ volvemos a incluir el formkey aquí
+            key: widget.state.formkey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 🧡 Ícono principal dentro de un círculo degradado
-                Container(
-                  height: 120,
-                  width: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        primary.withOpacity(0.95),
-                        primary.withOpacity(0.8),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: primary.withOpacity(0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                // 🍊 Logo circular con animación Fade + Bounce
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: Container(
+                      //height: 150, // 🔹 antes 200 → más compacto
+                      //width: 150,
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0), // 🔹 antes 18 → más pegado
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/img/clic.png',
+                            width: 180,
+                            height: 180,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.set_meal_rounded,
-                    size: 70,
-                    color: Colors.white,
+                    ),
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                //const SizedBox(height: 0), // 🔹 Espacio mínimo entre logo y texto
 
-                // 🧾 Título
+                // 🧾 Título y subtítulo
                 Text(
                   "Bienvenido",
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
                     fontSize: 38,
                     color: primary,
+                    letterSpacing: 0.2,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   "Inicia sesión para continuar",
                   style: GoogleFonts.poppins(
-                    fontSize: 15,
+                    fontSize: 15.5,
                     color: Colors.grey[700],
+                    height: 1.4,
                   ),
                 ),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 25),
 
                 // 📧 Campo de correo
                 _textFieldEmail(),
 
-                const SizedBox(height: 5),
+                const SizedBox(height: 0),
 
                 // 🔒 Campo de contraseña
                 _textFieldPassword(),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 35),
 
-                // 🚪 Botón de login
+                // 🚪 Botón de inicio de sesión
                 _buttonLogin(context, primary),
 
-                const SizedBox(height: 30),
+                const SizedBox(height: 35),
 
                 // 🧩 Enlace a registro
                 Row(
@@ -113,16 +151,17 @@ class LoginContent extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, 'register');
-                      },
-                      child: Text(
-                        "Regístrate",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14.5,
-                          color: primary,
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.underline,
+                      onTap: () => Navigator.pushNamed(context, 'register'),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: Text(
+                          "Regístrate",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14.5,
+                            color: primary,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                     ),
@@ -141,10 +180,16 @@ class LoginContent extends StatelessWidget {
     return DefaultTextField(
       label: 'Correo electrónico',
       icon: Icons.alternate_email_outlined,
+      controller: _emailController,
       onChanged: (text) {
-        bloc?.add(EmailChanged(email: BlocFormItem(value: text)));
+        widget.bloc?.add(EmailChanged(email: BlocFormItem(value: text)));
       },
-      validator: (value) => state.email.error,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'El correo es requerido';
+        }
+        return widget.state.email.error;
+      },
     );
   }
 
@@ -154,10 +199,16 @@ class LoginContent extends StatelessWidget {
       label: 'Contraseña',
       icon: Icons.lock_outline,
       obscureText: true,
+      controller: _passwordController,
       onChanged: (text) {
-        bloc?.add(PasswordChanged(password: BlocFormItem(value: text)));
+        widget.bloc?.add(PasswordChanged(password: BlocFormItem(value: text)));
       },
-      validator: (value) => state.password.error,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'La contraseña es requerida';
+        }
+        return widget.state.password.error;
+      },
     );
   }
 
@@ -168,16 +219,8 @@ class LoginContent extends StatelessWidget {
       height: 55,
       child: ElevatedButton(
         onPressed: () {
-          // ✅ validamos que el formkey exista antes de usarlo
-          if (state.formkey != null &&
-              state.formkey!.currentState != null &&
-              state.formkey!.currentState!.validate()) {
-            bloc?.add(LoginSubmit());
-          } else {
-            Fluttertoast.showToast(
-              msg: 'El formulario no es válido',
-              toastLength: Toast.LENGTH_LONG,
-            );
+          if (widget.state.formkey?.currentState?.validate() ?? false) {
+            widget.bloc?.add(LoginSubmit());
           }
         },
         style: ElevatedButton.styleFrom(
@@ -185,18 +228,17 @@ class LoginContent extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          elevation: 6,
+          elevation: 8,
+          shadowColor: primary.withOpacity(0.4),
         ).copyWith(
-          backgroundColor: WidgetStateProperty.resolveWith(
-            (states) => null,
-          ),
+          backgroundColor: WidgetStateProperty.resolveWith((_) => null),
         ),
         child: Ink(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                primary.withOpacity(0.95),
-                primary.withOpacity(0.8),
+                primary,
+                primary.withOpacity(0.9),
               ],
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,

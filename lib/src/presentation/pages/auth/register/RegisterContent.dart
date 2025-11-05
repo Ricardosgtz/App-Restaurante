@@ -25,7 +25,7 @@ class RegisterContent extends StatelessWidget {
           padding: EdgeInsets.only(
             left: 24,
             right: 24,
-            top: 25,
+            top: 0,
             bottom: MediaQuery.of(context).viewInsets.bottom + 20,
           ),
           child: Form(
@@ -33,48 +33,44 @@ class RegisterContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // 🍽️ Ícono circular igual al login
+                const SizedBox(height: 20),
+
+                // 👤 Ícono circular naranja sin animación
                 Container(
-                  height: 95,
-                  width: 95,
+                  width: 110,
+                  height: 110,
                   decoration: BoxDecoration(
+                    color: primary,
                     shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        primary.withOpacity(0.95),
-                        primary.withOpacity(0.8),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
                     boxShadow: [
                       BoxShadow(
                         color: primary.withOpacity(0.3),
-                        blurRadius: 8,
+                        blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                   child: const Icon(
-                    Icons.set_meal_rounded,
+                    Icons.person_rounded,
                     color: Colors.white,
-                    size: 56,
+                    size: 60,
                   ),
                 ),
-                const SizedBox(height: 18),
 
-                // ✨ Título
+                const SizedBox(height: 16),
+
+                // 🧾 Frases principales
                 Text(
-                  "Crea tu cuenta",
+                  "Únete a Clic&Eat",
                   style: GoogleFonts.poppins(
-                    color: primary,
-                    fontSize: 26,
                     fontWeight: FontWeight.bold,
+                    fontSize: 26,
+                    color: primary,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
-                  "Regístrate para comenzar a ordenar",
+                  "Regístrate y comienza a ordenar con un clic",
                   style: GoogleFonts.poppins(
                     color: Colors.grey[700],
                     fontSize: 14,
@@ -82,14 +78,16 @@ class RegisterContent extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 18),
 
-                // 📋 Campos (más juntos)
+                // 📋 Campos del formulario
                 _buildField(
                   label: 'Nombre',
                   icon: Icons.person_rounded,
                   onChanged: (text) {
-                    bloc?.add(RegisterNameChanged(name: BlocFormItem(value: text)));
+                    bloc?.add(
+                      RegisterNameChanged(name: BlocFormItem(value: text)),
+                    );
                   },
                   validator: (value) =>
                       value == null || value.isEmpty ? 'Ingresa tu nombre' : null,
@@ -99,7 +97,10 @@ class RegisterContent extends StatelessWidget {
                   icon: Icons.person_outline_rounded,
                   onChanged: (text) {
                     bloc?.add(
-                        RegisterLastnameChanged(lastname: BlocFormItem(value: text)));
+                      RegisterLastnameChanged(
+                        lastname: BlocFormItem(value: text),
+                      ),
+                    );
                   },
                   validator: (value) =>
                       value == null || value.isEmpty ? 'Ingresa tu apellido' : null,
@@ -108,7 +109,9 @@ class RegisterContent extends StatelessWidget {
                   label: 'Correo electrónico',
                   icon: Icons.alternate_email_rounded,
                   onChanged: (text) {
-                    bloc?.add(RegisterEmailChanged(email: BlocFormItem(value: text)));
+                    bloc?.add(
+                      RegisterEmailChanged(email: BlocFormItem(value: text)),
+                    );
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) return 'Ingresa tu correo';
@@ -123,7 +126,9 @@ class RegisterContent extends StatelessWidget {
                   label: 'Teléfono',
                   icon: Icons.phone_android_rounded,
                   onChanged: (text) {
-                    bloc?.add(RegisterPhoneChanged(phone: BlocFormItem(value: text)));
+                    bloc?.add(
+                      RegisterPhoneChanged(phone: BlocFormItem(value: text)),
+                    );
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) return 'Ingresa tu teléfono';
@@ -136,7 +141,11 @@ class RegisterContent extends StatelessWidget {
                   icon: Icons.lock_rounded,
                   obscureText: true,
                   onChanged: (text) {
-                    bloc?.add(RegisterPasswordChanged(password: BlocFormItem(value: text)));
+                    bloc?.add(
+                      RegisterPasswordChanged(
+                        password: BlocFormItem(value: text),
+                      ),
+                    );
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty)
@@ -150,8 +159,11 @@ class RegisterContent extends StatelessWidget {
                   icon: Icons.lock_outline_rounded,
                   obscureText: true,
                   onChanged: (text) {
-                    bloc?.add(RegisterConfirmPasswordChanged(
-                        confirmPassword: BlocFormItem(value: text)));
+                    bloc?.add(
+                      RegisterConfirmPasswordChanged(
+                        confirmPassword: BlocFormItem(value: text),
+                      ),
+                    );
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty)
@@ -162,9 +174,9 @@ class RegisterContent extends StatelessWidget {
                   },
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 14),
 
-                // 🧡 Botón Registrar
+                // 🧡 Botón principal
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -201,7 +213,7 @@ class RegisterContent extends StatelessWidget {
 
                 const SizedBox(height: 18),
 
-                // 🔁 Link a Login
+                // 🔁 Enlace para iniciar sesión
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -235,7 +247,6 @@ class RegisterContent extends StatelessWidget {
     );
   }
 
-  // Campo reutilizable
   Widget _buildField({
     required String label,
     required IconData icon,
@@ -244,7 +255,7 @@ class RegisterContent extends StatelessWidget {
     String? Function(String?)? validator,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 0), // 🔹 menos espacio entre campos
+      padding: const EdgeInsets.only(bottom: 0),
       child: DefaultTextField(
         label: label,
         icon: icon,

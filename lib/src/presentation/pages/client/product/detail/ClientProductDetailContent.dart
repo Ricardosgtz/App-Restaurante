@@ -9,6 +9,10 @@ import 'package:flutter_application_1/src/presentation/pages/client/product/deta
 import 'package:flutter_application_1/src/presentation/utils/AlertHelper.dart';
 import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+// 🛍️ Importar el ClientShoppingBagBloc para actualizar el contador
+import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagBloc.dart';
+import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagEvent.dart';
 
 class ClientProductDetailContent extends StatelessWidget {
   final Product? product;
@@ -191,15 +195,7 @@ class ClientProductDetailContent extends StatelessWidget {
 
         // 🟢 Botón agregar moderno
         GestureDetector(
-          onTap: () async {
-            await AlertHelper.showAlertDialog(
-              context: context,
-              title: "¡Agregado con éxito!",
-              message: "El producto se añadió a tu bolsa.",
-              isSuccess: true,
-            );
-            bloc?.add(AddProductToShoppingBag(product: product!));
-          },
+          onTap: () => _handleAddToCart(context),
           child: Container(
             width: 140,
             height: 55,
@@ -243,6 +239,42 @@ class ClientProductDetailContent extends StatelessWidget {
       ],
     );
   }
+
+// 🛍 Manejador para agregar al carrito con confirmación
+Future<void> _handleAddToCart(BuildContext context) async {
+  // 🔹 Mostrar confirmación
+  final result = await AlertHelper.showConfirmationDialog(
+    context: context,
+    title: "Agregar producto",
+    message: "¿Deseas añadir este producto a tu bolsa?",
+    confirmText: "Agregar",
+    cancelText: "Cancelar",
+    //iconType: "cart", // 🛒 Usa el ícono de carrito
+  );
+
+  // ✅ Solo si el usuario confirma
+  if (result == true) {
+    bloc?.add(AddProductToShoppingBag(product: product!));
+
+    // 🕐 Pequeña pausa para asegurar que se guarde
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    // 🔄 Actualiza la bolsa de compras
+    if (context.mounted) {
+      context.read<ClientShoppingBagBloc>().add(GetShoppingBag());
+    }
+
+    // 🎉 Mostrar alerta de éxito
+    //await AlertHelper.showAlertDialog(
+    //  context: context,
+    //  title: "¡Agregado con éxito!",
+    //  message: "El producto se añadió a tu bolsa.",
+    //  isSuccess: true,
+      //iconType: "cart",
+    //);
+  }
+}
+
 
   // 🔘 Botón de ícono minimalista
   Widget _iconButton(IconData icon, VoidCallback onTap) {

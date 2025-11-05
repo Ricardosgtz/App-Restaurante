@@ -3,5 +3,10 @@ import 'package:flutter_application_1/src/domain/models/Product.dart';
 import 'package:flutter_application_1/src/domain/utils/Resource.dart';
 
 abstract class ProductsRepository {
-  Future<Resource<List<Product>>> getProductsByCategory(int idCategory, BuildContext context);
+  Future<Resource<List<Product>>> getProductsByCategory(
+    int idCategory,
+    BuildContext context, {
+    bool forceRefresh = false,
+  });
 }
+

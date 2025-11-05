@@ -5,14 +5,36 @@ import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/
 import 'package:flutter_application_1/src/presentation/pages/profile/info/ProfileInfoPage.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/home/bloc/ClientHomeBloc.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/home/bloc/ClientHomeState.dart';
+import 'package:flutter_application_1/src/presentation/pages/client/home/bloc/ClientHomeEvent.dart';
 import 'package:flutter_application_1/src/presentation/widgets/HomeAppBar.dart';
 import 'package:flutter_application_1/src/presentation/widgets/HomeNavigationBar.dart';
 import 'package:flutter_application_1/src/presentation/pages/auth/login/LoginPage.dart';
 import 'package:flutter_application_1/main.dart';
+// 🛍️ Importar el ClientShoppingBagBloc
+import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagBloc.dart';
+import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagEvent.dart';
+import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagState.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ClientHomePage extends StatelessWidget {
+class ClientHomePage extends StatefulWidget {
   const ClientHomePage({super.key});
+
+  @override
+  State<ClientHomePage> createState() => _ClientHomePageState();
+}
+
+class _ClientHomePageState extends State<ClientHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 🛍️ Cargar los productos de la bolsa
+      context.read<ClientShoppingBagBloc>().add(GetShoppingBag());
+      
+      // 🔥 Resetear el estado de logout al iniciar
+      context.read<ClientHomeBloc>().add(const ResetLogoutState());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +54,7 @@ class ClientHomePage extends StatelessWidget {
 
     final List<NavigationItem> navItems = [
       NavigationItem(icon: Icons.category_outlined, activeIcon: Icons.category, label: 'Categorías'),
-      NavigationItem(icon: Icons.shopping_bag, activeIcon: Icons.shopping_bag_outlined, label: 'Mi Bolsa'),
+      NavigationItem(icon: Icons.shopping_bag_outlined, activeIcon: Icons.shopping_bag, label: 'Mi Bolsa'),
       NavigationItem(icon: Icons.receipt_long_outlined, activeIcon: Icons.receipt_long, label: 'Mis Ordenes'),
       NavigationItem(icon: Icons.person_outline, activeIcon: Icons.person, label: 'Perfil'),
     ];
@@ -40,12 +62,20 @@ class ClientHomePage extends StatelessWidget {
     return BlocListener<ClientHomeBloc, ClientHomeState>(
       listenWhen: (previous, current) =>
           current.isLoggedOut != previous.isLoggedOut,
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state.isLoggedOut) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-                builder: (_) => const MyApp(initialPage: LoginPage())),
+          // 🔥 Esperar 1.5 segundos para que se vea la animación de loading
+          await Future.delayed(const Duration(milliseconds: 1500));
+          
+          // 🔥 Verificar que el contexto sigue montado
+          if (!context.mounted) return;
+          
+          // 🔥 Resetear el estado ANTES de navegar
+          context.read<ClientHomeBloc>().add(const ResetLogoutState());
+          
+          // 🔥 Cerrar TODOS los diálogos y navegar al login en una sola operación
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            'login',
             (route) => false,
           );
         }
@@ -58,9 +88,15 @@ class ClientHomePage extends StatelessWidget {
             body: pages[state.pageIndex],
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
-            bottomNavigationBar: HomeNavigationBar(
-              selectedIndex: state.pageIndex,
-              items: navItems,
+            // 🛍️ Usamos BlocBuilder para escuchar cambios en la bolsa
+            bottomNavigationBar: BlocBuilder<ClientShoppingBagBloc, ClientShoppingBagState>(
+              builder: (context, bagState) {
+                return HomeNavigationBar(
+                  selectedIndex: state.pageIndex,
+                  items: navItems,
+                  shoppingBagCount: bagState.totalItems, // 👈 Pasamos el contador
+                );
+              },
             ),
           );
         },

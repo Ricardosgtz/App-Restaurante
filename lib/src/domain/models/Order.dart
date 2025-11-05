@@ -17,6 +17,7 @@ class Order {
   List<OrderDetail> orderdetails;
   double total;
   DateTime createdAt;
+  String? arrivalTime;
 
   Order({
     required this.id,
@@ -28,6 +29,7 @@ class Order {
     required this.orderdetails,
     required this.total,
     required this.createdAt,
+    this.arrivalTime,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -46,6 +48,7 @@ class Order {
             : [],
     total: double.tryParse(json["total"].toString()) ?? 0.0,
     createdAt: DateTime.parse(json["created_at"]),
+    arrivalTime: json["arrival_time"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -58,6 +61,7 @@ class Order {
     "orderdetails": List<dynamic>.from(orderdetails.map((x) => x.toJson())),
     "total": total,
     "created_at": createdAt.toIso8601String(),
+    "arrival_time": arrivalTime,
   };
 }
 
@@ -96,13 +100,29 @@ class Client {
 class Restaurant {
   int id;
   String name;
+  String? accountNumber; // 🆕 número de cuenta
+  String? clabe; // 🆕 clave interbancaria
 
-  Restaurant({required this.id, required this.name});
+  Restaurant({
+    required this.id,
+    required this.name,
+    this.accountNumber,
+    this.clabe,
+  });
 
-  factory Restaurant.fromJson(Map<String, dynamic> json) =>
-      Restaurant(id: json["id"], name: json["name"]);
+  factory Restaurant.fromJson(Map<String, dynamic> json) => Restaurant(
+    id: json["id"],
+    name: json["name"],
+    accountNumber: json["account_number"],
+    clabe: json["clabe"],
+  );
 
-  Map<String, dynamic> toJson() => {"id": id, "name": name};
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "account_number": accountNumber,
+    "clabe": clabe,
+  };
 }
 
 class OrderInfo {

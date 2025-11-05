@@ -1,6 +1,7 @@
 import 'package:flutter_application_1/src/data/dataSource/local/SharedPref.dart';
 import 'package:flutter_application_1/src/data/dataSource/remote/services/CategoriesService.dart';
 import 'package:flutter_application_1/src/data/dataSource/remote/services/OrdersServices.dart';
+import 'package:flutter_application_1/src/data/dataSource/remote/services/PaymentsService.dart';
 import 'package:flutter_application_1/src/data/dataSource/remote/services/ProductsService.dart';
 import 'package:flutter_application_1/src/data/dataSource/remote/services/AddressServices.dart';
 import 'package:flutter_application_1/src/data/dataSource/remote/services/UsersService.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_application_1/src/data/repository/AuthRepositoryImpl.dar
 import 'package:flutter_application_1/src/data/dataSource/remote/services/AuthService.dart';
 import 'package:flutter_application_1/src/data/repository/CategoriesRepositoryImpl.dart';
 import 'package:flutter_application_1/src/data/repository/OrdersRepositoryImpl.dart';
+import 'package:flutter_application_1/src/data/repository/PaymentsRepositoryImpl.dart';
 import 'package:flutter_application_1/src/data/repository/ProductsRepositoryImpl.dart';
 import 'package:flutter_application_1/src/data/repository/ShoppingBagRepositoryImpl.dart';
 import 'package:flutter_application_1/src/data/repository/UsersRepositoryImpl.dart';
@@ -17,6 +19,7 @@ import 'package:flutter_application_1/src/domain/repository/AddressRepository.da
 import 'package:flutter_application_1/src/domain/repository/AuthRepository.dart';
 import 'package:flutter_application_1/src/domain/repository/CategoriesRepository.dart';
 import 'package:flutter_application_1/src/domain/repository/OrdersRepository.dart';
+import 'package:flutter_application_1/src/domain/repository/PaymentsRepository.dart';
 import 'package:flutter_application_1/src/domain/repository/ProductsRepository.dart';
 import 'package:flutter_application_1/src/domain/repository/ShoppingBagRepository.dart';
 import 'package:flutter_application_1/src/domain/repository/UsersRepository.dart';
@@ -45,6 +48,8 @@ import 'package:flutter_application_1/src/domain/useCases/oreder/CreateOrderUseC
 import 'package:flutter_application_1/src/domain/useCases/oreder/GetOrderDetailUseCase.dart';
 import 'package:flutter_application_1/src/domain/useCases/oreder/GetOrdersByClientUseCase.dart';
 import 'package:flutter_application_1/src/domain/useCases/oreder/OrdersUseCases.dart';
+import 'package:flutter_application_1/src/domain/useCases/payments/CreatePaymentUseCase.dart';
+import 'package:flutter_application_1/src/domain/useCases/payments/PaymentsUseCases.dart';
 import 'package:flutter_application_1/src/domain/useCases/products/GetProductsByCategoryUseCase.dart';
 import 'package:flutter_application_1/src/domain/useCases/products/ProductsUseCases.dart';
 import 'package:flutter_application_1/src/domain/useCases/users/UpdateUsersUseCases.dart';
@@ -93,6 +98,11 @@ abstract class AppModule {
   AddressRepository get addressRepository => AddressRepositoryImpl(addressService, sharedPref);
   @injectable
   OrdersRepository get ordersRepository => OrdersRepositoryImpl(ordersService);
+  @injectable
+  PaymentsService get paymentsService => PaymentsService();
+  @injectable
+  PaymentsRepository get paymentsRepository => PaymentsRepositoryImpl(paymentsService);
+
 
   @injectable
   AuthUseCases get authUserCases => AuthUseCases(
@@ -143,5 +153,9 @@ abstract class AppModule {
     createOrder: CreateOrderUseCase(ordersRepository),
   );
 
+  @injectable
+  PaymentsUseCases get paymentsUseCases => PaymentsUseCases(
+    createPayment: CreatePaymentUseCase(paymentsRepository),
+  );
 
 }

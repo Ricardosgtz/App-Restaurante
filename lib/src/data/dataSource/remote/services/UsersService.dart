@@ -2,85 +2,74 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/data/api/ApiConfig.dart';
-import 'package:flutter_application_1/src/data/dataSource/local/SharedPref.dart';
-import 'package:flutter_application_1/src/domain/models/AuthResponse.dart';
+import 'package:flutter_application_1/src/data/dataSource/remote/services/BaseService.dart';
+import 'package:flutter_application_1/src/data/dataSource/remote/services/HttpClientHelper.dart';
 import 'package:flutter_application_1/src/domain/models/Cliente.dart';
-import 'package:flutter_application_1/src/domain/utils/AuthExpiredHandler.dart';
-import 'package:flutter_application_1/src/domain/utils/ListToString.dart';
 import 'package:flutter_application_1/src/domain/utils/Resource.dart';
-import 'package:flutter_application_1/src/domain/utils/TokenHelper.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart';
 
-class UsersService {
-  final SharedPref _sharedPref = SharedPref();
-
-  UsersService(); // ✅ Sin parámetros
-
-  /// 🔑 Obtener token fresco
-  Future<String?> _getToken() async {
-    try {
-      final data = await _sharedPref.read('cliente');
-      if (data != null) {
-        final authResponse = AuthResponse.fromJson(data);
-        if (!TokenHelper.isTokenExpired(authResponse)) {
-          return authResponse.token;
-        }
-      }
-      return null;
-    } catch (e) {
-      print('Error obteniendo token: $e');
-      return null;
-    }
-  }
-
+/// 👤 Servicio de Usuarios
+/// Con caché, retry logic, y logging automático
+class UsersService extends BaseService {
+  
+  /// 👤 Actualizar perfil sin imagen
+  /// ✅ Sin caché (mutación)
+  /// ✅ Retry automático
+  /// ✅ Invalida caché después de actualizar
   Future<Resource<Cliente>> update(
     int id,
     Cliente cliente,
     BuildContext context,
   ) async {
     try {
-      final tokenValue = await _getToken();
-      
-      if (tokenValue == null) {
-        if (context.mounted) {
-          await AuthExpiredHandler.handleUnauthorized(context);
-        }
-        return Error("Sesión expirada");
-      }
+      final tokenValue = await validateAndGetToken(context);
+      //if (tokenValue == null) return Error("Sesión expirada");
 
-      print('METODO ACTUALIZAR SIN IMAGEN');
-      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/clients/$id');
-      Map<String, String> headers = {
-        "Content-Type": "application/json",
-        "Authorization": tokenValue,
-      };
-      String body = json.encode({
+      print('👤 Actualizando perfil sin imagen (ID: $id)');
+      
+      final url = Uri.https(Apiconfig.API_ECOMMERCE, '/clients/$id');
+      final headers = await getAuthHeaders();
+      
+      final body = json.encode({
         'name': cliente.name,
         'lastname': cliente.lastname,
         'phone': cliente.phone,
       });
-      final response = await http.put(url, headers: headers, body: body);
-      final data = json.decode(response.body);
       
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Cliente userResponse = Cliente.fromJson(data);
-        return Success(userResponse);
-      } else if (response.statusCode == 401) {
-        if (context.mounted) {
-          await AuthExpiredHandler.handleUnauthorized(context);
-        }
-        return Error("Sesión expirada");
-      } else {
-        return Error(ListToString(data['message']));
-      }
+      final response = await HttpClientHelper.put(
+        url,
+        headers: headers,
+        body: body,
+        enableRetry: true,
+      );
+      
+      final result = await handleResponse<Cliente>(
+        response: response,
+        context: context,
+        onSuccess: (data) {
+          Cliente userResponse = Cliente.fromJson(data);
+          
+          // 🧹 Invalidar caché de usuario
+          invalidateCache('clients');
+          
+          print('✅ Usuario actualizado: ${userResponse.name}');
+          return userResponse;
+        },
+      );
+      
+      return result;
     } catch (e) {
-      print('Error: $e');
+      print('❌ Error update: $e');
       return Error(e.toString());
     }
   }
 
+  /// 📸 Actualizar perfil con imagen
+  /// ✅ Sin caché (mutación)
+  /// ✅ Retry automático para upload
+  /// ✅ Invalida caché después de actualizar
   Future<Resource<Cliente>> updateImage(
     int id,
     Cliente cliente,
@@ -88,22 +77,17 @@ class UsersService {
     BuildContext context,
   ) async {
     try {
-      final tokenValue = await _getToken();
-      
-      if (tokenValue == null) {
-        if (context.mounted) {
-          await AuthExpiredHandler.handleUnauthorized(context);
-        }
-        return Error("Sesión expirada");
-      }
+      final tokenValue = await validateAndGetToken(context);
+      if (tokenValue == null) return Error("Sesión expirada");
 
-      print('📤 METODO ACTUALIZAR CON IMAGEN');
-      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/clients/upload/$id');
+      print('📸 Actualizando perfil con imagen (ID: $id)');
+      
+      final url = Uri.https(Apiconfig.API_ECOMMERCE, '/clients/upload/$id');
 
       final request = http.MultipartRequest('PUT', url);
       request.headers['Authorization'] = tokenValue;
 
-      // 🖼️ Archivo de imagen
+      // 🖼️ Agregar archivo de imagen
       request.files.add(
         http.MultipartFile(
           'file',
@@ -114,33 +98,58 @@ class UsersService {
         ),
       );
 
-      // 📋 Campos normales (sin JSON)
+      // 📋 Agregar campos del perfil
       request.fields['name'] = cliente.name;
       request.fields['lastname'] = cliente.lastname;
       request.fields['phone'] = cliente.phone;
 
-      // 🚀 Enviar
-      final response = await request.send();
-      print('🔁 RESPONSE STATUS: ${response.statusCode}');
-      final responseString = await response.stream.transform(utf8.decoder).join();
-      print('🔁 RESPONSE BODY: $responseString');
+      // 🚀 Enviar petición con retry
+      final response = await HttpClientHelper.sendMultipart(
+        request,
+        enableRetry: true,
+      );
 
-      final data = json.decode(responseString);
+      print('🔁 Response status: ${response.statusCode}');
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Cliente userResponse = Cliente.fromJson(data);
-        return Success(userResponse);
-      } else if (response.statusCode == 401) {
-        if (context.mounted) {
-          await AuthExpiredHandler.handleUnauthorized(context);
-        }
-        return Error("Sesión expirada");
-      } else {
-        return Error(ListToString(data['message']));
-      }
+      final result = await handleStreamedResponse<Cliente>(
+        response: response,
+        context: context,
+        onSuccess: (data) {
+          Cliente userResponse = Cliente.fromJson(data);
+          
+          // 🧹 Invalidar caché de usuario
+          invalidateCache('clients');
+          
+          print('✅ Usuario actualizado con imagen: ${userResponse.name}');
+          return userResponse;
+        },
+      );
+      
+      return result;
     } catch (e) {
-      print('❌ Error: $e');
+      print('❌ Error updateImage: $e');
       return Error(e.toString());
     }
   }
+
+  /// 🔄 Refrescar datos de usuario
+  /// (Si tienes un endpoint GET para obtener perfil)
+  /* 
+  Future<Resource<Cliente>> getProfile(
+    int id,
+    BuildContext context, {
+    bool forceRefresh = false,
+  }) async {
+    final url = 'https://${Apiconfig.API_ECOMMERCE}/clients/$id';
+    
+    return await getCached<Cliente>(
+      url: url,
+      context: context,
+      onSuccess: (data) => Cliente.fromJson(data),
+      cacheDuration: CacheDuration.userProfile,
+      useCache: !forceRefresh,
+      enableRetry: true,
+    );
+  }
+  */
 }

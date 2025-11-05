@@ -2,6 +2,7 @@ import 'package:flutter_application_1/src/domain/models/Product.dart';
 import 'package:flutter_application_1/src/domain/useCases/ShoppingBag/ShoppingBagUseCases.dart';
 import 'package:flutter_application_1/src/domain/useCases/auth/AuthUseCases.dart';
 import 'package:flutter_application_1/src/domain/useCases/oreder/OrdersUseCases.dart';
+import 'package:flutter_application_1/src/domain/useCases/payments/PaymentsUseCases.dart';
 import 'package:flutter_application_1/src/domain/utils/Resource.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagEvent.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagState.dart';
@@ -11,34 +12,41 @@ class ClientShoppingBagBloc extends Bloc<ClientShoppingBagEvent, ClientShoppingB
   ShoppingBagUseCases shoppingBagUseCases;
   OrdersUseCases ordersUseCases;
   AuthUseCases authUseCases;
+  PaymentsUseCases paymentsUseCases; // ✅ NUEVO
 
   ClientShoppingBagBloc(
     this.shoppingBagUseCases,
     this.ordersUseCases,
     this.authUseCases,
+    this.paymentsUseCases
+
   ) : super(ClientShoppingBagState()) {
     on<GetShoppingBag>(_onGetShoppingBag);
-    on<AddItem>(_onAddItem);
-    on<SubtractItem>(_onSubtractItem);
+    on<AddItems>(_onAddItem);
+    on<SubtractItems>(_onSubtractItem);
     on<RemoveItem>(_onRemoveItem);
     on<GetTotal>(_onGetTotal);
     on<ConfirmOrder>(_onConfirmOrder);
-    on<ClearShoppingBag>(_onClearShoppingBag); // ✅ nuevo evento
+    on<ClearShoppingBag>(_onClearShoppingBag);
   }
 
   Future<void> _onGetShoppingBag(GetShoppingBag event, Emitter<ClientShoppingBagState> emit) async {
     List<Product> products = await shoppingBagUseCases.getProducts.run();
-    emit(state.copyWith(products: products));
+    int totalItems = _calculateTotalItems(products); // 👈 Calcular total items
+    emit(state.copyWith(
+      products: products,
+      totalItems: totalItems, // 👈 Emitir total items
+    ));
     add(GetTotal());
   }
 
-  Future<void> _onAddItem(AddItem event, Emitter<ClientShoppingBagState> emit) async {
+  Future<void> _onAddItem(AddItems event, Emitter<ClientShoppingBagState> emit) async {
     event.product.quantity = event.product.quantity! + 1;
     await shoppingBagUseCases.add.run(event.product);
     add(GetShoppingBag());
   }
 
-  Future<void> _onSubtractItem(SubtractItem event, Emitter<ClientShoppingBagState> emit) async {
+  Future<void> _onSubtractItem(SubtractItems event, Emitter<ClientShoppingBagState> emit) async {
     if (event.product.quantity! > 1) {
       event.product.quantity = event.product.quantity! - 1;
       await shoppingBagUseCases.add.run(event.product);
@@ -78,6 +86,7 @@ class ClientShoppingBagBloc extends Bloc<ClientShoppingBagEvent, ClientShoppingB
           orderCreated: result.data,
           products: [],
           total: 0,
+          totalItems: 0, // 👈 Reset contador
         ));
       } else if (result is Error) {
         emit(state.copyWith(
@@ -93,9 +102,18 @@ class ClientShoppingBagBloc extends Bloc<ClientShoppingBagEvent, ClientShoppingB
     }
   }
 
-  // 🧹 NUEVO: limpiar carrito manualmente desde la UI
+  // 🧹 Limpiar carrito manualmente desde la UI
   Future<void> _onClearShoppingBag(ClearShoppingBag event, Emitter<ClientShoppingBagState> emit) async {
-    await shoppingBagUseCases.deleteShoppingBag.run(); // borra del almacenamiento local
-    emit(state.copyWith(products: [], total: 0)); // actualiza el estado vacío
+    await shoppingBagUseCases.deleteShoppingBag.run();
+    emit(state.copyWith(
+      products: [],
+      total: 0,
+      totalItems: 0, // 👈 Reset contador
+    ));
+  }
+
+  // 🧮 Calcular el total de items (suma de cantidades)
+  int _calculateTotalItems(List<Product> products) {
+    return products.fold(0, (sum, product) => sum + (product.quantity ?? 1));
   }
 }

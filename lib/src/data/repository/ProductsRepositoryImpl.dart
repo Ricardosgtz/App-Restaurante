@@ -5,12 +5,20 @@ import 'package:flutter_application_1/src/domain/repository/ProductsRepository.d
 import 'package:flutter_application_1/src/domain/utils/Resource.dart';
 
 class ProductsRepositoryImpl implements ProductsRepository {
-  ProductsService productsService;
+  final ProductsService productsService;
 
   ProductsRepositoryImpl(this.productsService);
 
   @override
-  Future<Resource<List<Product>>> getProductsByCategory(int idCategory, BuildContext context) {
-    return productsService.getProductByCategory(idCategory, context);
+  Future<Resource<List<Product>>> getProductsByCategory(
+    int idCategory,
+    BuildContext context, {
+    bool forceRefresh = false,
+  }) {
+    return productsService.getProductByCategory(
+      idCategory,
+      context,
+      forceRefresh: forceRefresh,
+    );
   }
 }

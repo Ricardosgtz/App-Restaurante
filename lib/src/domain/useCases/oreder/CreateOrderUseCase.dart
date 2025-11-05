@@ -13,6 +13,7 @@ class CreateOrderUseCase {
     required String orderType,
     String? note,
     required List<Map<String, dynamic>> items,
+    String? arrivalTime,
   }) => ordersRepository.createOrder(
     clientId: clientId,
     restaurantId: restaurantId,
@@ -21,5 +22,6 @@ class CreateOrderUseCase {
     orderType: orderType,
     note: note,
     items: items,
+    arrivalTime: arrivalTime
   );
 }

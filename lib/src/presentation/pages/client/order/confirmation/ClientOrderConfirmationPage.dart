@@ -5,6 +5,7 @@ import 'package:flutter_application_1/src/presentation/widgets/HomeAppBar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+/// Página de confirmación con diseño tipo magazine/card stack
 class ClientOrderConfirmationPage extends StatelessWidget {
   const ClientOrderConfirmationPage({super.key});
 
@@ -13,283 +14,631 @@ class ClientOrderConfirmationPage extends StatelessWidget {
     final Order order = ModalRoute.of(context)!.settings.arguments as Order;
     final formattedDate =
         DateFormat('d MMMM yyyy', 'es_MX').format(order.createdAt);
+    final formattedTime = DateFormat('h:mm a', 'es_MX').format(order.createdAt);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      appBar: HomeAppBar(title: 'Confirmación de Orden'),
-
-      // ✅ Botón fijo al fondo
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(18),
-        child: SafeArea(
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  'client/home',
-                  (route) => false,
-                );
-              },
-              icon: const Icon(Icons.home_rounded),
-              label: const Text("Volver al inicio"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                textStyle: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 3,
-              ),
-            ),
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          'Pedido Confirmado',
+          style: GoogleFonts.outfit(
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+            fontSize: 20,
           ),
         ),
+        centerTitle: true,
       ),
-
-      // ✅ Contenido desplazable
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        physics: const BouncingScrollPhysics(),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 10),
-
-            // 🎉 Encabezado visual
-            Icon(Icons.check_circle_rounded,
-                size: 70, color: AppTheme.primaryColor),
-            const SizedBox(height: 14),
-            Text(
-              "¡Orden realizada con éxito!",
-              style: GoogleFonts.poppins(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              "Tu pedido ha sido confirmado correctamente",
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 24),
-
-            // 🧾 Información principal
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  _buildInfoRow("Número de Orden:", "#${order.id}",
-                      icon: Icons.receipt_long_rounded),
-                  //_buildInfoRow("Cliente:",
-                  //    "${order.client.name} ${order.client.lastname}",
-                  //    icon: Icons.person),
-                  _buildInfoRow("Fecha:", formattedDate,
-                      icon: Icons.calendar_today_outlined),
-                  //_buildInfoRow("Tipo de Pedido:", order.order.type,
-                  //    icon: Icons.delivery_dining),
-                  //_buildInfoRow("Restaurante:", order.restaurant.name,
-                  //    icon: Icons.storefront_rounded),
-                  _buildInfoRow("Estatus:", order.status.name,
-                      icon: Icons.flag_circle_rounded),
-                  if (order.address != null)
-                    _buildInfoRow("Dirección:", order.address!.address,
-                        icon: Icons.location_on_outlined),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 25),
-
-            // 🛍️ Lista de productos
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Productos del pedido",
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black87,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: order.orderdetails.length,
-                separatorBuilder: (_, __) =>
-                    Divider(height: 1, color: Colors.grey[300]),
-                itemBuilder: (context, index) {
-                  final detail = order.orderdetails[index];
-                  return ListTile(
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: FadeInImage.assetNetwork(
-                        placeholder: 'assets/img/no-image.png',
-                        image: detail.product.image1 ?? '',
-                        width: 45,
-                        height: 45,
-                        fit: BoxFit.cover,
-                        imageErrorBuilder: (_, __, ___) => Image.asset(
-                          'assets/img/no-image.png',
-                          width: 45,
-                          height: 45,
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      detail.product.name,
-                      style: GoogleFonts.poppins(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    subtitle: Text(
-                      "x${detail.quantity}  •  \$${detail.unitPrice}",
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    trailing: Text(
-                      "\$${detail.subtotal.toStringAsFixed(2)}",
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryColor,
-                        fontSize: 14.5,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 25),
-
-            // 💰 Total
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.green.shade100),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Total a pagar:",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    "\$${order.total.toStringAsFixed(2)}",
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green.shade700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 100), // espacio para evitar que se tape por el botón fijo
+            _buildSuccessHero(order),
+            const SizedBox(height: 30),
+            _buildStackedCards(order, formattedDate, formattedTime),
+            const SizedBox(height: 120),
           ],
         ),
       ),
+      bottomSheet: _buildBottomSheet(context),
     );
   }
 
-  /// 🔹 Fila estilizada con ícono
-  Widget _buildInfoRow(String label, String value, {IconData? icon}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  /// Hero section con diseño asimétrico
+  Widget _buildSuccessHero(Order order) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          if (icon != null)
-            Icon(icon, color: Colors.grey[600], size: 18),
-          if (icon != null) const SizedBox(width: 8),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: GoogleFonts.poppins(
-                  fontSize: 14.5,
-                  color: Colors.black87,
+          // Card principal con ángulo
+          Transform.rotate(
+            angle: -0.02,
+            child: Container(
+              width: double.infinity,
+              height: 220,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primaryColor,
+                    AppTheme.primaryColor.withOpacity(0.85),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                children: [
-                  TextSpan(
-                    text: "$label ",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  TextSpan(
-                    text: value,
-                    style: TextStyle(
-                      color: Colors.grey[800],
-                      fontWeight: FontWeight.w400,
-                    ),
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.4),
+                    blurRadius: 30,
+                    offset: const Offset(0, 20),
                   ),
                 ],
               ),
+            ),
+          ),
+
+          // Contenido centrado
+          Container(
+            width: double.infinity,
+            height: 220,
+            padding: const EdgeInsets.all(30),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Icono check animado
+                const Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.white,
+                  size: 70,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Pedido #${order.id}',
+                  style: GoogleFonts.outfit(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: 1,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Confirmado exitosamente',
+                  style: GoogleFonts.outfit(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white.withOpacity(0.9),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// Cards apiladas con efecto 3D
+  Widget _buildStackedCards(Order order, String date, String time) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          // Card de información
+          _buildInfoCard(order, date, time),
+          const SizedBox(height: 16),
+
+          // Card de productos
+          _buildProductsCard(order),
+          const SizedBox(height: 16),
+
+          // Card de total
+          _buildTotalCard(order),
+        ],
+      ),
+    );
+  }
+
+  /// Card de información con diseño asimétrico
+  Widget _buildInfoCard(Order order, String date, String time) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Información del Pedido',
+                style: GoogleFonts.outfit(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // Grid de información
+          _buildInfoGrid(
+            icon: Icons.calendar_today,
+            label: 'Fecha',
+            value: date,
+            color: Colors.blue,
+          ),
+          const SizedBox(height: 16),
+          _buildInfoGrid(
+            icon: Icons.schedule,
+            label: 'Hora',
+            value: time,
+            color: Colors.purple,
+          ),
+          const SizedBox(height: 16),
+          _buildInfoGrid(
+            icon: Icons.label,
+            label: 'Estado',
+            value: order.status.name,
+            color: _getStatusColor(order.status.name),
+          ),
+          if (order.address != null) ...[
+            const SizedBox(height: 16),
+            _buildInfoGrid(
+              icon: Icons.location_on,
+              label: 'Dirección',
+              value: order.address!.address,
+              color: Colors.red,
+              isMultiline: true,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Grid item de información
+  Widget _buildInfoGrid({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+    bool isMultiline = false,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(
+            icon,
+            color: color,
+            size: 22,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label.toUpperCase(),
+                style: GoogleFonts.outfit(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.grey[500],
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: GoogleFonts.outfit(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+                maxLines: isMultiline ? 3 : 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Card de productos con diseño magazine
+  Widget _buildProductsCard(Order order) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header con badge
+          Container(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppTheme.primaryColor,
+                            AppTheme.primaryColor.withOpacity(0.6),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Productos',
+                      style: GoogleFonts.outfit(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${order.orderdetails.length} items',
+                    style: GoogleFonts.outfit(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Lista de productos
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            itemCount: order.orderdetails.length,
+            separatorBuilder: (_, __) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Divider(color: Colors.grey[200], height: 1),
+            ),
+            itemBuilder: (context, index) {
+              return _buildProductItem(order.orderdetails[index]);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Item de producto con diseño horizontal
+  Widget _buildProductItem(OrderDetail detail) {
+    return Row(
+      children: [
+        // Imagen con efecto hover
+        Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: FadeInImage.assetNetwork(
+              placeholder: 'assets/img/no-image.png',
+              image: detail.product.image1 ?? '',
+              fit: BoxFit.cover,
+              imageErrorBuilder: (_, __, ___) => Container(
+                color: Colors.grey[100],
+                child: Icon(
+                  Icons.restaurant,
+                  color: Colors.grey[400],
+                  size: 28,
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 16),
+
+        // Info
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                detail.product.name,
+                style: GoogleFonts.outfit(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'x${detail.quantity} • \$${detail.unitPrice}',
+                style: GoogleFonts.outfit(
+                  fontSize: 13,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Precio
+        Text(
+          '\$${detail.subtotal.toStringAsFixed(2)}',
+          style: GoogleFonts.outfit(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            color: AppTheme.primaryColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Card de total con diseño destacado
+  Widget _buildTotalCard(Order order) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.orange[600]!,
+            Colors.orange[400]!,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 25,
+            offset: const Offset(0, 15),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'TOTAL',
+            style: GoogleFonts.outfit(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withOpacity(0.7),
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '\$',
+                  style: GoogleFonts.outfit(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  order.total.toStringAsFixed(2),
+                  style: GoogleFonts.outfit(
+                    fontSize: 42,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: -1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 🌟 Bottom sheet con botón moderno tipo “Glass + Gradient Glow”
+  Widget _buildBottomSheet(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.8),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withOpacity(0.2),
+            blurRadius: 25,
+            offset: const Offset(0, -8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: GestureDetector(
+          onTap: () {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              'client/home',
+              (route) => false,
+            );
+          },
+          child: Container(
+            height: 60,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.primaryColor,
+                  AppTheme.primaryColor.withOpacity(0.85),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryColor.withOpacity(0.3),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Glow animado sutil (toque dinámico)
+                Positioned.fill(
+                  child: AnimatedOpacity(
+                    duration: const Duration(seconds: 2),
+                    opacity: 0.1,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          colors: [
+                            Colors.white.withOpacity(0.4),
+                            Colors.transparent,
+                          ],
+                          radius: 1.2,
+                          center: const Alignment(0.0, -0.6),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Contenido principal
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: const Icon(
+                        Icons.home_rounded,
+                        size: 24,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      "Volver al inicio",
+                      style: GoogleFonts.outfit(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.3,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Obtiene color del estado
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pendiente':
+        return Colors.orange;
+      case 'confirmada':
+        return Colors.blue;
+      case 'enviada':
+        return Colors.purple;
+      case 'entregada':
+        return Colors.green;
+      case 'cancelada':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 }

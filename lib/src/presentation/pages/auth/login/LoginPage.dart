@@ -22,6 +22,9 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   LoginBloc? _bloc;
 
+  // ✅ Bandera para controlar cuando está navegando
+  bool _isNavigating = false;
+
   @override
   Widget build(BuildContext context) {
     _bloc = BlocProvider.of<LoginBloc>(context, listen: false);
@@ -34,22 +37,35 @@ class _LoginPageState extends State<LoginPage> {
           final responseState = state.response;
 
           if (responseState is Error) {
+            // ✅ Resetear la bandera si hay error
+            setState(() {
+              _isNavigating = false;
+            });
+
             Fluttertoast.showToast(
               msg: responseState.message,
               toastLength: Toast.LENGTH_LONG,
               backgroundColor: Colors.redAccent,
               textColor: Colors.white,
             );
-          } else if (responseState is Success) {
+          } else if (responseState is Success && !_isNavigating) {
+            // ✅ Activar bandera para mantener el loading visible
+            setState(() {
+              _isNavigating = true;
+            });
+
             final authResponse = responseState.data as AuthResponse;
             _bloc?.add(LoginSaveUserSession(authResponse: authResponse));
 
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                'client/home',
-                (route) => false,
-              );
+            // ✅ Delay de 2.5 segundos antes de navegar
+            Future.delayed(const Duration(milliseconds: 2500), () {
+              if (mounted) {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  'client/home',
+                  (route) => false,
+                );
+              }
             });
           }
         },
@@ -57,100 +73,108 @@ class _LoginPageState extends State<LoginPage> {
           builder: (context, state) {
             final responseState = state.response;
 
-            // 🌀 Mostrar pantalla de carga con tu icono y degradado
-            if (responseState is Loading) {
-              return Stack(
-                children: [
-                  LoginContent(_bloc, state),
-                  Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white,
-                          Color(0xFFFFF3E0),
-                          Color(0xFFFFE0B2),
-                        ],
-                      ),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // 🍽️ Ícono circular igual al del login
-                          Container(
-                            height: 120,
-                            width: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                colors: [
-                                  primary.withOpacity(0.95),
-                                  primary.withOpacity(0.8),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: primary.withOpacity(0.3),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.set_meal_rounded,
-                              color: Colors.white,
-                              size: 70,
-                            ),
-                          ),
-
-                          const SizedBox(height: 35),
-
-                          // ✨ Texto principal estilo WhatsApp
-                          Text(
-                            "Conectando con tu cuenta...",
-                            style: GoogleFonts.poppins(
-                              color: Colors.orange.shade700,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.4,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-
-                          const SizedBox(height: 25),
-
-                          // 🟠 Loader animado elegante
-                          const SpinKitThreeBounce(
-                            color: Colors.orange,
-                            size: 30,
-                            duration: Duration(milliseconds: 1000),
-                          ),
-
-                          const SizedBox(height: 25),
-
-                          // 💬 Mensaje secundario más pequeño
-                          Text(
-                            "Por favor espera un momento...",
-                            style: GoogleFonts.poppins(
-                              color: Colors.grey[700],
-                              fontSize: 14.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+            // 🌀 Pantalla de carga si está cargando o navegando
+            if (responseState is Loading || _isNavigating) {
+              return Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white,
+                      Color(0xFFFFF3E0),
+                      Color(0xFFFFE0B2),
+                    ],
                   ),
-                ],
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 🟠 Logo circular con animación
+                      AnimatedScale(
+                        scale: _isNavigating ? 1.1 : 1.0,
+                        duration: const Duration(milliseconds: 300),
+                        child: Container(
+                          height: 200,
+                          width: 200,
+                          // 🖼️ Imagen original del logo (sin color blanco)
+                          child: Padding(
+                            padding: const EdgeInsets.all(18.0),
+                            child: Image.asset(
+                              'assets/img/clic.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 0),
+
+                      // ✨ Texto con animación Fade + Slide
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 800),
+                        transitionBuilder: (child, animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0, 0.3),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: Text(
+                          _isNavigating
+                              ? "¡Bienvenido!"
+                              : "Conectando con tu cuenta...",
+                          key: ValueKey(_isNavigating),
+                          style: GoogleFonts.poppins(
+                            color: Colors.orange.shade700,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.4,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      // 🔄 Loader animado
+                      const SpinKitThreeBounce(
+                        color: Colors.orange,
+                        size: 30,
+                        duration: Duration(milliseconds: 1000),
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      // 💬 Mensaje secundario animado
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: Text(
+                          _isNavigating
+                              ? "Preparando tu experiencia..."
+                              : "Por favor espera un momento...",
+                          key: ValueKey(_isNavigating ? 'welcome' : 'waiting'),
+                          style: GoogleFonts.poppins(
+                            color: Colors.grey[700],
+                            fontSize: 14.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
             }
 
-            // 🟢 Estado normal (sin loading)
+            // 🟢 Estado normal
             return LoginContent(_bloc, state);
           },
         ),

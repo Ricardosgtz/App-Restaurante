@@ -21,6 +21,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+// 🔑 GlobalKey para acceder al Navigator desde cualquier lugar
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
@@ -52,15 +55,38 @@ void main() async {
   runApp(MyApp(initialPage: initialPage));
 }
 
-class MyApp extends StatelessWidget {
+// 🔄 Convertir MyApp en StatefulWidget
+class MyApp extends StatefulWidget {
   final Widget initialPage;
   const MyApp({required this.initialPage, super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+  
+  /// 🔄 Método estático para reiniciar la app desde cualquier lugar
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_MyAppState>()?.restartApp();
+  }
+}
+
+class _MyAppState extends State<MyApp> {
+  Key _key = UniqueKey();
+
+  /// 🔄 Reinicia la app completa cambiando la key
+  void restartApp() {
+    setState(() {
+      _key = UniqueKey(); // Nueva key = rebuild completo de toda la app
+    });
+    print('✅ App reiniciada completamente');
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: blocProviders,
+      key: _key, // ← Key que cambia para forzar rebuild completo
+      providers: blocProviders, // ← Se crean BLoCs NUEVOS cuando cambia la key
       child: MaterialApp(
+        navigatorKey: navigatorKey, // ← Para navegar desde AuthExpiredHandler
         builder: FToastBuilder(),
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
@@ -69,7 +95,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         // ✅ Pantalla inicial dinámica según token
-        home: initialPage,
+        home: widget.initialPage,
         routes: {
           'login': (BuildContext context) => LoginPage(),
           'register': (BuildContext context) => RegisterPage(),

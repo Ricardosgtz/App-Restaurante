@@ -10,6 +10,7 @@ class ClientHomeBloc extends Bloc<ClientHomeEvent, ClientHomeState> {
   ClientHomeBloc(this.authUseCases): super(ClientHomeState()) {
     on<ChangeDrawerPage>(_onChangeDrawerPage);
     on<Logout>(_onLogout);
+    on<ResetLogoutState>(_onResetLogoutState);
   }
 
   Future<void> _onChangeDrawerPage(ChangeDrawerPage event, Emitter<ClientHomeState> emit) async {
@@ -25,4 +26,7 @@ class ClientHomeBloc extends Bloc<ClientHomeEvent, ClientHomeState> {
      emit(state.copyWith(isLoggedOut: true));
   }
 
+   Future<void> _onResetLogoutState(ResetLogoutState event, Emitter<ClientHomeState> emit) async {
+    emit(state.copyWith(isLoggedOut: false));
+  }
 }

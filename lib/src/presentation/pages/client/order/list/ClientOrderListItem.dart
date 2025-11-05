@@ -14,38 +14,25 @@ class ClientOrderListItem extends StatelessWidget {
         DateFormat('d MMM yyyy, h:mm a', 'es_MX').format(order.createdAt);
 
     // 🎨 Colores e íconos según estado
-    Color statusColor;
-    IconData statusIcon;
+    final Map<String, Map<String, dynamic>> statusMap = {
+      'pendiente': {
+        'color': Colors.orangeAccent,
+        'icon': Icons.hourglass_bottom_rounded
+      },
+      'confirmada': {
+        'color': Colors.blueAccent,
+        'icon': Icons.verified_rounded
+      },
+      'en proceso': {'color': Colors.amber, 'icon': Icons.coffee_rounded},
+      'enviada': {'color': Colors.deepPurpleAccent, 'icon': Icons.local_shipping},
+      'entregada': {'color': Colors.green, 'icon': Icons.check_circle_rounded},
+      'cancelada': {'color': Colors.redAccent, 'icon': Icons.cancel_rounded},
+    };
 
-    switch (order.status.name.toLowerCase()) {
-      case 'pendiente':
-        statusColor = Colors.orangeAccent;
-        statusIcon = Icons.hourglass_bottom;
-        break;
-      case 'confirmada':
-        statusColor = Colors.blueAccent;
-        statusIcon = Icons.verified_rounded;
-        break;
-      case 'en proceso':
-        statusColor = Colors.amber;
-        statusIcon = Icons.coffee;
-        break;
-      case 'enviada':
-        statusColor = Colors.deepPurpleAccent;
-        statusIcon = Icons.local_shipping;
-        break;
-      case 'entregada':
-        statusColor = Colors.green;
-        statusIcon = Icons.check_circle;
-        break;
-      case 'cancelada':
-        statusColor = Colors.redAccent;
-        statusIcon = Icons.cancel_outlined;
-        break;
-      default:
-        statusColor = Colors.grey;
-        statusIcon = Icons.help_outline;
-    }
+    final color =
+        statusMap[order.status.name.toLowerCase()]?['color'] ?? Colors.grey;
+    final icon =
+        statusMap[order.status.name.toLowerCase()]?['icon'] ?? Icons.help_outline_rounded;
 
     return GestureDetector(
       onTap: () =>
@@ -53,175 +40,189 @@ class ClientOrderListItem extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
           color: Colors.white,
-          border: Border.all(color: statusColor.withOpacity(0.4), width: 1.6),
+          borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
-              color: statusColor.withOpacity(0.15),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+
+        // 🟧 Franja lateral + contenido
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: Stack(
             children: [
-              // 🧾 Pedido + Estado
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(statusIcon, color: statusColor, size: 20),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Pedido #${order.id}',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 17,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
-                  // 💰 Precio
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      gradient: LinearGradient(
-                        colors: [
-                          statusColor.withOpacity(0.15),
-                          statusColor.withOpacity(0.05),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+              // 🟩 Franja lateral degradada
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: 6,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        color,
+                        color.withOpacity(0.6),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                     ),
-                    child: Text(
-                      '\$${order.total.toStringAsFixed(2)}',
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: statusColor,
-                      ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(22),
+                      bottomLeft: Radius.circular(22),
                     ),
                   ),
-                ],
+                ),
               ),
 
-              const SizedBox(height: 8),
-
-              // 📅 Fecha
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today_outlined,
-                      size: 16, color: Colors.grey),
-                  const SizedBox(width: 6),
-                  Text(
-                    formattedDate,
-                    style: GoogleFonts.poppins(
-                      fontSize: 13.5,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 10),
-
-              // 🏪 Restaurante
-              Row(
-                children: [
-                  const Icon(Icons.storefront, size: 16, color: Colors.grey),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      order.restaurant.name,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14.5,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 8),
-
-              // 📍 Dirección
-              if (order.address != null)
-                Row(
+              // 📦 Contenido principal
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.location_on_outlined,
-                        size: 16, color: Colors.grey),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        order.address!.address,
-                        style: GoogleFonts.poppins(
-                          fontSize: 13.5,
-                          color: Colors.black54,
-                          height: 1.3,
+                    // 🧾 Header — Pedido + Total
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: color.withOpacity(0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(icon, color: color, size: 20),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Pedido #${order.id}',
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 17,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
                         ),
-                        overflow: TextOverflow.ellipsis,
+                        // 💰 Total
+                        Text(
+                          '\$${order.total.toStringAsFixed(2)}',
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 17,
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+                    Divider(color: Colors.grey[200], thickness: 1),
+                    const SizedBox(height: 10),
+
+                    // 🏪 Restaurante
+                    Row(
+                      children: [
+                        const Icon(Icons.storefront_rounded,
+                            size: 18, color: Colors.orange),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            order.restaurant.name,
+                            style: GoogleFonts.outfit(
+                              fontSize: 15,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    // 📍 Dirección
+                    if (order.address != null)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.location_on_outlined,
+                              size: 18, color: Colors.redAccent),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              order.address!.address,
+                              style: GoogleFonts.outfit(
+                                fontSize: 13.5,
+                                color: Colors.grey[700],
+                                height: 1.3,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                    const SizedBox(height: 6),
+
+                    // 📅 Fecha
+                    Row(
+                      children: [
+                        const Icon(Icons.calendar_today_rounded,
+                            size: 16, color: Colors.blueAccent),
+                        const SizedBox(width: 6),
+                        Text(
+                          formattedDate,
+                          style: GoogleFonts.outfit(
+                            fontSize: 13.5,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // 🏷️ Badge de estado
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: color.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(50),
+                          border: Border.all(
+                            color: color.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(icon, size: 17, color: color),
+                            const SizedBox(width: 6),
+                            Text(
+                              order.status.name,
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13.5,
+                                color: color,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
-                ),
-
-              const SizedBox(height: 14),
-
-              // 🏷️ Estado
-              Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(50),
-                    border: Border.all(
-                      color: statusColor.withOpacity(0.4),
-                      width: 1.1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: statusColor.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(statusIcon, size: 17, color: statusColor),
-                      const SizedBox(width: 6),
-                      Text(
-                        order.status.name,
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13.5,
-                          color: statusColor,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ],

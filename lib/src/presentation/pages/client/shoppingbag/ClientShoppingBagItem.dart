@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/config/AppTheme.dart';
@@ -5,9 +6,18 @@ import 'package:flutter_application_1/src/domain/models/Product.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagBloc.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagEvent.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagState.dart';
+import 'package:flutter_application_1/src/presentation/utils/AlertHelper.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ClientShoppingBagItem extends StatelessWidget {
+/// 🎨 DISEÑO 3: CARD ELEVADA CON GLASSMORPHISM
+/// Características:
+/// - Efecto glassmorphism premium
+/// - Diseño elevado con sombras profundas
+/// - Controles grandes y táctiles
+/// - Separación visual clara
+/// - Botón eliminar flotante
+
+class ClientShoppingBagItem extends StatefulWidget {
   final ClientShoppingBagBloc? bloc;
   final ClientShoppingBagState state;
   final Product? product;
@@ -15,223 +25,374 @@ class ClientShoppingBagItem extends StatelessWidget {
   const ClientShoppingBagItem(this.bloc, this.state, this.product, {super.key});
 
   @override
+  State<ClientShoppingBagItem> createState() => _ClientShoppingBagItemState();
+}
+
+class _ClientShoppingBagItemState extends State<ClientShoppingBagItem>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.98,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final primary = AppTheme.primaryColor;
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        // 🟢 Tarjeta del producto
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 9, vertical: 14),
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) => _controller.reverse(),
+      onTapCancel: () => _controller.reverse(),
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.white,
-            border: Border.all(
-              color: primary.withOpacity(0.50),
-              width: 1.9,
+            borderRadius: BorderRadius.circular(28),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [primary.withOpacity(0.05), primary.withOpacity(0.02)],
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
+                color: primary.withOpacity(0.15),
+                blurRadius: 20,
+                spreadRadius: 2,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _imageProduct(),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _textProduct(primary),
-                      const SizedBox(height: 3),
-                      _textDescription(),
-                      const SizedBox(height: 10),
-                      _priceAndControls(primary),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1.5,
+                  ),
+                  borderRadius: BorderRadius.circular(28),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withOpacity(0.9),
+                      Colors.white.withOpacity(0.7),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
+                child: Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          // Imagen del producto
+                          _imageProduct(primary),
 
-        // 🗑️ Botón de eliminar flotante
-        Positioned(
-          top: 25,
-          right: 25,
-          child: GestureDetector(
-            onTap: () => bloc?.add(RemoveItem(product: product!)),
-            child: Container(
-              width: 25,
-              height: 25,
-              decoration: BoxDecoration(
-                color: Colors.redAccent.withOpacity(0.9),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.redAccent.withOpacity(0.4),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                CupertinoIcons.trash_fill,
-                color: Colors.white,
-                size: 18,
+                          const SizedBox(width: 16),
+
+                          // Información
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Nombre
+                                Text(
+                                  widget.product?.name ?? 'Producto',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.grey.shade900,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                // Precio unitario
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    '\$${widget.product?.price.toStringAsFixed(2) ?? '0.00'} por unidad',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: primary,
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                // Controles y total
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // Controles cantidad
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade50,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: Colors.grey.shade200,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          _controlButton(
+                                            icon: CupertinoIcons.minus,
+                                            onTap:
+                                                () => widget.bloc?.add(
+                                                  SubtractItems(
+                                                    product: widget.product!,
+                                                  ),
+                                                ),
+                                            primary: primary,
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                            ),
+                                            child: Text(
+                                              widget.product?.quantity
+                                                      .toString() ??
+                                                  '0',
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w800,
+                                                color: Colors.grey.shade900,
+                                              ),
+                                            ),
+                                          ),
+                                          _controlButton(
+                                            icon: CupertinoIcons.add,
+                                            onTap:
+                                                () => widget.bloc?.add(
+                                                  AddItems(
+                                                    product: widget.product!,
+                                                  ),
+                                                ),
+                                            primary: primary,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    // Precio total
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 10,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            primary,
+                                            primary.withOpacity(0.8),
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(14),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: primary.withOpacity(0.4),
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Text(
+                                        '\$${((widget.product?.price ?? 0) * (widget.product?.quantity ?? 0)).toStringAsFixed(2)}',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Botón eliminar
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: GestureDetector(
+                        onTap: () => _showDeleteConfirmation(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.red.shade400,
+                                Colors.red.shade600,
+                              ],
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.red.withOpacity(0.4),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            CupertinoIcons.trash_fill,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
-  // 🖼 Imagen con margen interno y 4 bordes redondeados
-  Widget _imageProduct() {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
+  Widget _imageProduct(Color primary) {
+    return Container(
+      width: 90,
+      height: 90,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [primary.withOpacity(0.2), primary.withOpacity(0.1)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          width: 95,
-          height: 95,
-          color: Colors.grey.shade100,
-          child: product != null && product!.image1!.isNotEmpty
-              ? FadeInImage.assetNetwork(
-                  placeholder: 'assets/img/no-image.png',
-                  image: product!.image1!,
+        borderRadius: BorderRadius.circular(20),
+        child:
+            widget.product != null && widget.product!.image1!.isNotEmpty
+                ? Image.network(
+                  widget.product!.image1!,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            primary.withOpacity(0.3),
+                            primary.withOpacity(0.1),
+                          ],
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.shopping_bag_outlined,
+                        size: 45,
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                    );
+                  },
                 )
-              : Image.asset('assets/img/no-image.png', fit: BoxFit.cover),
-        ),
+                : Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        primary.withOpacity(0.3),
+                        primary.withOpacity(0.1),
+                      ],
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 45,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                ),
       ),
     );
   }
 
-  // 🍽 Nombre del producto
-  Widget _textProduct(Color primary) {
-    return Text(
-      product?.name ?? 'Producto gourmet',
-      style: GoogleFonts.poppins(
-        fontSize: 16,
-        fontWeight: FontWeight.w700,
-        color: primary,
-      ),
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  // 🧾 Descripción
-  Widget _textDescription() {
-    return Text(
-      product?.description ??
-          'Platillo preparado con ingredientes frescos y de alta calidad.',
-      style: GoogleFonts.poppins(
-        fontSize: 12,
-        color: Colors.grey.shade600,
-        height: 1.4,
-      ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  // 💵 Precio y controles
-  Widget _priceAndControls(Color primary) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Precio
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [primary, primary.withOpacity(0.85)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: primary.withOpacity(0.3),
-                blurRadius: 5,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Text(
-            '\$${(product!.price * product!.quantity!).toStringAsFixed(2)}',
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 14.5,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-
-        // Controles de cantidad
-        Row(
-          children: [
-            _circleButton(
-              icon: CupertinoIcons.minus,
-              color: primary,
-              onTap: () => bloc?.add(SubtractItem(product: product!)),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              product?.quantity.toString() ?? '0',
-              style: GoogleFonts.poppins(
-                fontSize: 15.5,
-                color: Colors.grey.shade900,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(width: 10),
-            _circleButton(
-              icon: CupertinoIcons.add,
-              color: primary,
-              onTap: () => bloc?.add(AddItem(product: product!)),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // 🔘 Botón circular elegante
-  Widget _circleButton({
+  Widget _controlButton({
     required IconData icon,
-    required Color color,
     required VoidCallback onTap,
+    required Color primary,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        width: 34,
-        height: 34,
+      child: Container(
+        width: 36,
+        height: 36,
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
           color: Colors.white,
-          border: Border.all(color: color.withOpacity(0.6), width: 1.4),
+          shape: BoxShape.circle,
+          border: Border.all(color: primary.withOpacity(0.3), width: 1.5),
           boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.2),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
+            BoxShadow(color: primary.withOpacity(0.1), blurRadius: 6),
           ],
         ),
-        child: Icon(icon, size: 18, color: color),
+        child: Icon(icon, size: 18, color: primary),
       ),
     );
+  }
+
+  Future<void> _showDeleteConfirmation(BuildContext context) async {
+    final result = await AlertHelper.showConfirmationDialog(
+      context: context,
+      title: "¿Eliminar producto?",
+      message:
+          '¿Deseas eliminar "${widget.product?.name ?? 'este producto'}" de tu carrito?',
+      confirmText: "Eliminar",
+      cancelText: "Cancelar",
+      isDanger: true, // 🔴 activa el estilo rojo de alerta
+    );
+
+    if (result == true && mounted) {
+      widget.bloc?.add(RemoveItem(product: widget.product!));
+    }
   }
 }

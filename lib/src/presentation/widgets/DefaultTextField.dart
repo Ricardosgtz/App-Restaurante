@@ -11,6 +11,7 @@ class DefaultTextField extends StatefulWidget {
   final Function(String text) onChanged;
   final String? Function(String?)? validator;
   final bool obscureText;
+  final TextEditingController? controller; // 🔥 Agregado
 
   const DefaultTextField({
     Key? key,
@@ -22,6 +23,7 @@ class DefaultTextField extends StatefulWidget {
     this.validator,
     this.obscureText = false,
     this.textInputType = TextInputType.text,
+    this.controller, // 🔥 Agregado
   }) : super(key: key);
 
   @override
@@ -53,7 +55,8 @@ class _DefaultTextFieldState extends State<DefaultTextField> {
         children: [
           TextFormField(
             obscureText: _obscure,
-            initialValue: widget.initialValue,
+            controller: widget.controller, // 🔥 Usar controller si está presente
+            initialValue: widget.controller == null ? widget.initialValue : null, // 🔥 Solo usar initialValue si NO hay controller
             onChanged: widget.onChanged,
             keyboardType: widget.textInputType,
             validator: widget.validator,

@@ -102,8 +102,9 @@ class ClientShoppingBagBottomBar extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ).copyWith(
-                      backgroundColor:
-                          WidgetStateProperty.resolveWith((states) {
+                      backgroundColor: WidgetStateProperty.resolveWith((
+                        states,
+                      ) {
                         if (states.contains(WidgetState.pressed)) {
                           return primary.withOpacity(0.85);
                         }
@@ -113,13 +114,13 @@ class ClientShoppingBagBottomBar extends StatelessWidget {
                     child: Row(
                       children: [
                         const Icon(
-                          CupertinoIcons.paperplane_fill,
+                          Icons.task_alt_rounded, // puedes cambiar por cualquiera de arriba
                           color: Colors.white,
-                          size: 20,
+                          size: 22,
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Confirmar',
+                          'Ordenar',
                           style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,

@@ -11,16 +11,16 @@ class GetShoppingBag extends ClientShoppingBagEvent {
   const GetShoppingBag();
 }
 
-class AddItem extends ClientShoppingBagEvent {
+class AddItems extends ClientShoppingBagEvent {
   final Product product;
-  const AddItem({required this.product});
+  const AddItems({required this.product});
   @override
   List<Object?> get props => [product];
 }
 
-class SubtractItem extends ClientShoppingBagEvent {
+class SubtractItems extends ClientShoppingBagEvent {
   final Product product;
-  const SubtractItem({required this.product});
+  const SubtractItems({required this.product});
   @override
   List<Object?> get props => [product];
 }
@@ -46,6 +46,7 @@ class ConfirmOrder extends ClientShoppingBagEvent {
   final String orderType;
   final String? note;
   final List<Map<String, dynamic>> items;
+  
 
   const ConfirmOrder({
     required this.clientId,

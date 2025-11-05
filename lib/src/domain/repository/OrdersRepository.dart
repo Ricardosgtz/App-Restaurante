@@ -1,17 +1,18 @@
+// 📁 src/domain/repository/OrdersRepository.dart
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/src/domain/models/Order.dart';
 import 'package:flutter_application_1/src/domain/utils/Resource.dart';
 
 abstract class OrdersRepository {
+  Future<Resource<List<Order>>> getOrdersByClient(
+    int clientId,
+    BuildContext context, {
+    bool forceRefresh = false, // 👈 nuevo parámetro opcional
+  });
 
-  /// Obtiene todas las órdenes de un cliente específico
-  Future<Resource<List<Order>>> getOrdersByClient(int clientId, BuildContext context);
-
-  /// Obtiene el detalle completo de una orden específica
   Future<Resource<Order>> getOrderDetail(int orderId, BuildContext context);
 
-  /// Crea una nueva orden
   Future<Resource<Order>> createOrder({
     required int clientId,
     BuildContext? context,
@@ -21,5 +22,6 @@ abstract class OrdersRepository {
     required String orderType,
     String? note,
     required List<Map<String, dynamic>> items,
+    String? arrivalTime,
   });
 }

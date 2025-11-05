@@ -25,3 +25,7 @@ class Logout extends ClientHomeEvent {
   @override
   List<Object?> get props => [];
 }
+
+class ResetLogoutState extends ClientHomeEvent {
+  const ResetLogoutState();
+}

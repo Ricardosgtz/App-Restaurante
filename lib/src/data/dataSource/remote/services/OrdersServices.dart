@@ -1,117 +1,83 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/data/api/ApiConfig.dart';
-import 'package:flutter_application_1/src/data/dataSource/local/SharedPref.dart';
-import 'package:flutter_application_1/src/domain/models/AuthResponse.dart';
+import 'package:flutter_application_1/src/data/dataSource/remote/services/BaseService.dart';
+import 'package:flutter_application_1/src/data/dataSource/remote/services/HttpClientHelper.dart';
+import 'package:flutter_application_1/src/data/dataSource/remote/services/ResponseCache.dart';
 import 'package:flutter_application_1/src/domain/models/Order.dart';
-import 'package:flutter_application_1/src/domain/utils/AuthExpiredHandler.dart';
-import 'package:flutter_application_1/src/domain/utils/ListToString.dart';
 import 'package:flutter_application_1/src/domain/utils/Resource.dart';
-import 'package:flutter_application_1/src/domain/utils/TokenHelper.dart';
-import 'package:http/http.dart' as http;
 
-class OrdersService {
-  final SharedPref _sharedPref = SharedPref();
-
-  OrdersService(); // ✅ Sin parámetros
-
-  /// 🔑 Obtener token fresco
-  Future<String?> _getToken() async {
+/// 📦 Servicio de Órdenes
+/// Con caché, retry logic, y logging automático
+class OrdersService extends BaseService {
+  /// 📦 Obtener todas las órdenes de un cliente
+  ///
+  /// Implementa:
+  /// ✅ Caché de 5 minutos (órdenes cambian frecuentemente)
+  /// ✅ Retry automático en caso de fallo
+  /// ✅ Logging de peticiones
+  Future<Resource<List<Order>>> getOrdersByClient(
+    int clientId,
+    BuildContext context, {
+    bool forceRefresh = false,
+  }) async {
     try {
-      final data = await _sharedPref.read('cliente');
-      if (data != null) {
-        final authResponse = AuthResponse.fromJson(data);
-        if (!TokenHelper.isTokenExpired(authResponse)) {
-          return authResponse.token;
-        }
-      }
-      return null;
-    } catch (e) {
-      print('Error obteniendo token: $e');
-      return null;
-    }
-  }
+      final url = 'https://${Apiconfig.API_ECOMMERCE}/orders/client/$clientId';
 
-  /// Obtiene todas las órdenes de un cliente específico
-  Future<Resource<List<Order>>> getOrdersByClient(int clientId, BuildContext context) async {
-    try {
-      final tokenValue = await _getToken();
-      
-      if (tokenValue == null) {
-        if (context.mounted) {
-          await AuthExpiredHandler.handleUnauthorized(context);
-        }
-        return Error("Sesión expirada");
-      }
-
-      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/orders/client/$clientId');
-      Map<String, String> headers = {
-        "Content-Type": "application/json",
-        "Authorization": tokenValue,
-      };
-
-      final response = await http.get(url, headers: headers);
-      final data = json.decode(response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final list = (data is List) ? data : (data['data'] ?? []);
-        List<Order> orders = (list as List)
-            .map((item) => Order.fromJson(item as Map<String, dynamic>))
-            .toList();
-        return Success(orders);
-      } else if (response.statusCode == 401) {
-        if (context.mounted) {
-          await AuthExpiredHandler.handleUnauthorized(context);
-        }
-        return Error("Sesión expirada");
-      } else {
-        return Error(ListToString(data['message'] ?? 'Error desconocido'));
-      }
+      return await getCached<List<Order>>(
+        url: url,
+        context: context,
+        onSuccess: (data) {
+          // Manejo flexible de la respuesta (array directo o dentro de 'data')
+          final list = (data is List) ? data : (data['data'] ?? []);
+          List<Order> orders =
+              (list as List)
+                  .map((item) => Order.fromJson(item as Map<String, dynamic>))
+                  .toList();
+          print('📦 Orders loaded: ${orders.length} (Client: $clientId)');
+          return orders;
+        },
+        cacheDuration: CacheDuration.orders, // 5 minutos
+        useCache: !forceRefresh,
+        enableRetry: true,
+      );
     } catch (e) {
       print('❌ Error getOrdersByClient: $e');
       return Error('Error al obtener las órdenes: $e');
     }
   }
 
-  /// Obtiene el detalle completo de una orden específica
-  Future<Resource<Order>> getOrderDetail(int orderId, BuildContext context) async {
+  /// 📋 Obtener detalle de una orden específica
+  /// ✅ Caché de 5 minutos
+  Future<Resource<Order>> getOrderDetail(
+    int orderId,
+    BuildContext context, {
+    bool forceRefresh = false,
+  }) async {
     try {
-      final tokenValue = await _getToken();
-      
-      if (tokenValue == null) {
-        if (context.mounted) {
-          await AuthExpiredHandler.handleUnauthorized(context);
-        }
-        return Error("Sesión expirada");
-      }
+      final url = 'https://${Apiconfig.API_ECOMMERCE}/orders/$orderId';
 
-      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/orders/$orderId');
-      Map<String, String> headers = {
-        "Content-Type": "application/json",
-        "Authorization": tokenValue,
-      };
-
-      final response = await http.get(url, headers: headers);
-      final data = json.decode(response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Order order = Order.fromJson(data);
-        return Success(order);
-      } else if (response.statusCode == 401) {
-        if (context.mounted) {
-          await AuthExpiredHandler.handleUnauthorized(context);
-        }
-        return Error("Sesión expirada");
-      } else {
-        return Error(ListToString(data['message']));
-      }
+      return await getCached<Order>(
+        url: url,
+        context: context,
+        onSuccess: (data) {
+          Order order = Order.fromJson(data);
+          print('📋 Order detail loaded: #${order.id}');
+          return order;
+        },
+        cacheDuration: CacheDuration.orders, // 5 minutos
+        useCache: !forceRefresh,
+        enableRetry: true,
+      );
     } catch (e) {
-      print('Error getOrderDetail: $e');
+      print('❌ Error getOrderDetail: $e');
       return Error(e.toString());
     }
   }
 
-  /// Crea una nueva orden
+  /// ✅ Crear nueva orden
+  /// ✅ Sin caché (mutación)
+  /// ✅ Invalida caché de órdenes después de crear
   Future<Resource<Order>> createOrder({
     required int clientId,
     required int restaurantId,
@@ -120,24 +86,19 @@ class OrdersService {
     required String orderType,
     String? note,
     required List<Map<String, dynamic>> items,
-    required BuildContext? context,
+    String? arrivalTime, // 👈 nuevo parámetro opcional
+    required BuildContext context,
   }) async {
     try {
-      final tokenValue = await _getToken();
-      
-      if (tokenValue == null) {
-        if (context!.mounted) {
-          await AuthExpiredHandler.handleUnauthorized(context);
-        }
-        return Error("Sesión expirada");
-      }
+      final tokenValue = await validateAndGetToken(context);
+      if (tokenValue == null) return Error("Sesión expirada");
 
-      Uri url = Uri.https(Apiconfig.API_ECOMMERCE, '/orders');
-      Map<String, String> headers = {
-        "Content-Type": "application/json",
-        "Authorization": tokenValue,
-      };
+      print('✅ Creando orden para cliente: $clientId');
 
+      final url = Uri.https(Apiconfig.API_ECOMMERCE, '/orders');
+      final headers = await getAuthHeaders();
+
+      // Construir el body de la petición
       Map<String, dynamic> body = {
         "client": clientId,
         "restaurant": restaurantId,
@@ -147,32 +108,55 @@ class OrdersService {
         "items": items,
       };
 
+      // 📍 Agregar dirección solo si es domicilio
       if (orderType == "domicilio" && addressId != null) {
         body["address"] = addressId;
       }
 
-      final response = await http.post(
+      // 🕒 Agregar hora de llegada solo si es anticipado
+      if (orderType == "anticipado" &&
+          arrivalTime != null &&
+          arrivalTime.isNotEmpty) {
+        // Django espera formato "HH:mm" o "HH:mm:ss"
+        body["arrival_time"] = arrivalTime;
+      }
+
+      print("📤 Enviando orden: ${json.encode(body)}");
+
+      final response = await HttpClientHelper.post(
         url,
         headers: headers,
         body: json.encode(body),
+        enableRetry: true,
       );
 
-      final data = json.decode(response.body);
+      final result = await handleResponse<Order>(
+        response: response,
+        context: context,
+        onSuccess: (data) {
+          Order order = Order.fromJson(data);
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Order order = Order.fromJson(data);
-        return Success(order);
-      } else if (response.statusCode == 401) {
-        if (context!.mounted) {
-          await AuthExpiredHandler.handleUnauthorized(context);
-        }
-        return Error("Sesión expirada");
-      } else {
-        return Error(ListToString(data['message']));
-      }
+          // 🧹 Invalidar caché de órdenes
+          invalidateCache('orders');
+
+          print('✅ Order created: #${order.id}');
+          return order;
+        },
+      );
+
+      return result;
     } catch (e) {
-      print('Error createOrder: $e');
+      print('❌ Error createOrder: $e');
       return Error(e.toString());
     }
+  }
+
+  /// 🔄 Refrescar órdenes
+  Future<Resource<List<Order>>> refreshOrders(
+    int clientId,
+    BuildContext context,
+  ) async {
+    invalidateCache('orders');
+    return getOrdersByClient(clientId, context, forceRefresh: true);
   }
 }

@@ -1,10 +1,19 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/src/config/AppTheme.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// 🎨 AlertHelper - Estilo horizontal con ícono al lado
+/// Diseño exacto del _showDeleteConfirmation del Design3
+/// Características:
+/// - Ícono circular pequeño al lado del título
+/// - Layout horizontal
+/// - Dos botones (Cancelar + Acción)
+/// - Profesional y moderno
+
 class AlertHelper {
-  /// 🌟 Muestra un AlertDialog moderno de éxito o error
+  /// 🌟 Muestra un AlertDialog moderno
   static Future<void> showAlertDialog({
     required BuildContext context,
     required String title,
@@ -15,33 +24,55 @@ class AlertHelper {
   }) async {
     if (!context.mounted) return;
 
-    await showGeneralDialog(
+    await showDialog(
       context: context,
-      barrierLabel: "Alert",
       barrierDismissible: barrierDismissible,
-      barrierColor: Colors.black.withOpacity(0.35),
-      transitionDuration: const Duration(milliseconds: 280),
-      pageBuilder: (_, __, ___) => const SizedBox(),
-      transitionBuilder: (context, animation, _, child) {
-        final curvedValue = Curves.easeOutBack.transform(animation.value);
-        return Transform.scale(
-          scale: curvedValue,
-          child: Opacity(
-            opacity: animation.value,
-            child: _ModernAlertDialog(
-              title: title,
-              message: message,
-              isSuccess: isSuccess,
-              onClose: onClose,
-            ),
-          ),
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (BuildContext context) {
+        return _ModernAlertDialog(
+          title: title,
+          message: message,
+          isSuccess: isSuccess,
+          onClose: onClose,
+        );
+      },
+    );
+  }
+
+  /// 🎯 Muestra un diálogo de confirmación
+  static Future<bool?> showConfirmationDialog({
+    required BuildContext context,
+    required String title,
+    required String message,
+    String confirmText = "Confirmar",
+    String cancelText = "Cancelar",
+    bool isDanger = false,
+    
+  }) async {
+    if (!context.mounted) return null;
+
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black.withOpacity(0.5),
+      builder: (BuildContext context) {
+        return _ConfirmationDialog(
+          title: title,
+          message: message,
+          confirmText: confirmText,
+          cancelText: cancelText,
+          isDanger: isDanger,
         );
       },
     );
   }
 }
 
-class _ModernAlertDialog extends StatelessWidget {
+// ═══════════════════════════════════════════════════════════
+// Alert Dialog (Notificación)
+// ═══════════════════════════════════════════════════════════
+
+class _ModernAlertDialog extends StatefulWidget {
   final String title;
   final String message;
   final bool isSuccess;
@@ -55,122 +86,280 @@ class _ModernAlertDialog extends StatelessWidget {
   });
 
   @override
+  State<_ModernAlertDialog> createState() => _ModernAlertDialogState();
+}
+
+class _ModernAlertDialogState extends State<_ModernAlertDialog>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final color = isSuccess ? Colors.green : Colors.redAccent;
-    final icon = isSuccess
-        ? CupertinoIcons.checkmark_seal_fill
+    final Color accentColor = widget.isSuccess 
+        ? AppTheme.primaryColor 
+        : Colors.red.shade600;
+    
+    final Color lightAccent = widget.isSuccess
+        ? AppTheme.primaryColor.withOpacity(0.1)
+        : Colors.red.shade50;
+
+    final IconData icon = widget.isSuccess
+        ? Icons.task_alt_rounded
         : CupertinoIcons.exclamationmark_triangle_fill;
 
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 35, vertical: 24),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(25),
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withOpacity(0.96),
-                  Colors.grey.shade100.withOpacity(0.9),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        backgroundColor: Colors.white,
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+        title: Row(
+          children: [
+            // Ícono circular pequeño
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: lightAccent,
+                shape: BoxShape.circle,
               ),
-              border: Border.all(
-                color: color.withOpacity(0.3),
-                width: 1.5,
+              child: Icon(
+                icon,
+                color: accentColor,
+                size: 24,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.2),
-                  blurRadius: 25,
-                  offset: const Offset(0, 8),
-                ),
-              ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 🔹 Ícono
-                Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: color.withOpacity(0.15),
-                  ),
-                  child: Icon(icon, color: color, size: 40),
+            const SizedBox(width: 12),
+            // Título
+            Expanded(
+              child: Text(
+                widget.title,
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Colors.grey.shade900,
                 ),
-                const SizedBox(height: 16),
-
-                // 🔹 Título
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // 🔹 Mensaje
-                Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 15.5,
-                    color: Colors.black87,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // 🔹 Botón
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      if (onClose != null) onClose!();
-                    },
-                    icon: Icon(
-                      isSuccess
-                          ? CupertinoIcons.checkmark_alt
-                          : CupertinoIcons.xmark_circle,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    label: Text(
-                      isSuccess ? "Aceptar" : "Cerrar",
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                        color: Colors.white,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: color,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      elevation: 6,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 18,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
+          ],
+        ),
+        content: Text(
+          widget.message,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.grey.shade700,
+            height: 1.5,
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancelar',
+              style: GoogleFonts.poppins(
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (widget.onClose != null) widget.onClose!();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: accentColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+            ),
+            child: Text(
+              widget.isSuccess ? 'Aceptar' : 'Entendido',
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// Confirmation Dialog (Confirmación)
+// ═══════════════════════════════════════════════════════════
+
+class _ConfirmationDialog extends StatefulWidget {
+  final String title;
+  final String message;
+  final String confirmText;
+  final String cancelText;
+  final bool isDanger;
+
+  const _ConfirmationDialog({
+    required this.title,
+    required this.message,
+    required this.confirmText,
+    required this.cancelText,
+    required this.isDanger,
+  });
+
+  @override
+  State<_ConfirmationDialog> createState() => _ConfirmationDialogState();
+}
+
+class _ConfirmationDialogState extends State<_ConfirmationDialog>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Color accentColor = widget.isDanger 
+        ? Colors.red.shade600
+        : AppTheme.primaryColor;
+    
+    final Color lightAccent = widget.isDanger
+        ? Colors.red.shade50
+        : AppTheme.primaryColor.withOpacity(0.1);
+
+    final IconData icon = widget.isDanger
+        ? CupertinoIcons.exclamationmark_triangle_fill
+        : CupertinoIcons.question_circle_fill;
+
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        backgroundColor: Colors.white,
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+        title: Row(
+          children: [
+            // Ícono circular
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: lightAccent,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: accentColor,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Título
+            Expanded(
+              child: Text(
+                widget.title,
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Colors.grey.shade900,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          widget.message,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.grey.shade700,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              widget.cancelText,
+              style: GoogleFonts.poppins(
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: accentColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+            ),
+            child: Text(
+              widget.confirmText,
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

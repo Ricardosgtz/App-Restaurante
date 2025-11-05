@@ -8,6 +8,7 @@ import 'package:flutter_application_1/src/presentation/pages/client/category/lis
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ClientCategoryListPage extends StatefulWidget {
   const ClientCategoryListPage({super.key});
@@ -22,10 +23,8 @@ class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
   @override
   void initState() {
     super.initState();
-    // ✅ Obtener el bloc correctamente
     _bloc = BlocProvider.of<ClientCategoryListBloc>(context);
 
-    // ✅ Llamar al evento después del primer frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _bloc.add(GetCategories(context));
     });
@@ -33,8 +32,6 @@ class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocListener<ClientCategoryListBloc, ClientCategoryListState>(
@@ -55,7 +52,7 @@ class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
             final responseState = state.response;
 
             if (responseState is Success) {
-              List<Category> categories = responseState.data as List<Category>;
+              final categories = responseState.data as List<Category>;
 
               if (categories.isEmpty) {
                 return const Center(
@@ -66,7 +63,6 @@ class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
                 );
               }
 
-              // ✅ GridView con 2 columnas
               return GridView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -82,15 +78,37 @@ class _ClientCategoryListPageState extends State<ClientCategoryListPage> {
               );
             }
 
-            // 🔄 Loader animado
-            return const Center(
-              child: SpinKitThreeBounce(
-                color: Colors.orange,
-                size: 30,
-                duration: Duration(seconds: 1),
-              ),
-            );
+            // 🔄 Pantalla de carga elegante
+            return _buildLoadingScreen();
           },
+        ),
+      ),
+    );
+  }
+
+  /// 🧡 Pantalla de carga con animación y texto
+  Widget _buildLoadingScreen() {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SpinKitThreeBounce(
+              color: Colors.orange,
+              size: 35,
+              duration: Duration(milliseconds: 1200),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Cargando categorías...',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );
