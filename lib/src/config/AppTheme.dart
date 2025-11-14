@@ -8,7 +8,13 @@ class AppTheme {
   static ThemeData get theme {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(seedColor: primaryColor, primary: primaryColor),
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primaryColor,
+        primary: primaryColor,
+        background: Colors.white,
+        surface: Colors.white,
+      ),
+      scaffoldBackgroundColor: Colors.white, // 🔥 Fondo blanco global
       textTheme: GoogleFonts.poppinsTextTheme(),
 
       appBarTheme: AppBarTheme(

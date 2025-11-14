@@ -15,4 +15,3 @@ class GetCategories extends ClientCategoryListEvent {
   @override
   List<Object?> get props => [context];
 }
-

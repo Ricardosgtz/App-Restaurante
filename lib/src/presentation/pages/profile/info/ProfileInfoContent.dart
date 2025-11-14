@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_application_1/src/config/AppTheme.dart';
@@ -14,65 +15,46 @@ class ProfileInfoContent extends StatelessWidget {
     final primary = AppTheme.primaryColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFDFD),
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
             children: [
-              const SizedBox(height: 10),
-
-              // 👤 Imagen perfil (estilo original)
-              Stack(
-                children: [
-                  _imageProfile(primary),
-                  Positioned(
-                    bottom: 5,
-                    right: 15,
-                    child: _editButton(context, primary),
-                  ),
-                ],
-              ),
-
               const SizedBox(height: 35),
+              //Encabezado del perfil
+              _profileHeader(context, primary),
+              const SizedBox(height: 20),
 
-              // 🏷️ Título principal
-              Text(
-                'Mi Perfil',
-                style: GoogleFonts.poppins(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: primary,
+              // Contenedor de información
+              _glassContainer(
+                child: Column(
+                  children: [
+                    _infoItem(
+                      CupertinoIcons.person_fill,
+                      '${cliente?.name ?? ''} ${cliente?.lastname ?? ''}',
+                      "Nombre de Usuario",
+                    ),
+                    const Divider(height: 1, color: Colors.black12),
+                    _infoItem(
+                      CupertinoIcons.mail_solid,
+                      cliente?.email ?? '',
+                      "Correo Electrónico",
+                    ),
+                    const Divider(height: 1, color: Colors.black12),
+                    _infoItem(
+                      CupertinoIcons.phone_solid,
+                      cliente?.phone ?? '',
+                      "Teléfono",
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(
-                'Tu información personal',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
-              ),
-              const SizedBox(height: 30),
 
-              // 📋 Tarjetas informativas
-              _infoCard(
-                CupertinoIcons.person_fill,
-                '${cliente?.name ?? ''} ${cliente?.lastname ?? ''}',
-                "Nombre de Usuario",
-              ),
-              _infoCard(
-                CupertinoIcons.mail_solid,
-                cliente?.email ?? '',
-                "Correo Electrónico",
-              ),
-              _infoCard(
-                CupertinoIcons.phone_solid,
-                cliente?.phone ?? '',
-                "Teléfono",
-              ),
+              const SizedBox(height: 20),
 
-              const Spacer(),
+              // Botón editar perfil
+              _editProfileButton(context, primary),
             ],
           ),
         ),
@@ -80,128 +62,129 @@ class ProfileInfoContent extends StatelessWidget {
     );
   }
 
-  /// 👤 Imagen perfil (manteniendo tu estilo original)
-  Widget _imageProfile(Color primary) {
+  // 🧊 Contenedor con efecto limpio y sombra suave
+  Widget _glassContainer({required Widget child}) {
     return Container(
-      width: 170,
-      height: 170,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: primary, width: 5),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withOpacity(0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: Container(
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-          ),
-          child: ClipOval(
-            child: cliente != null && cliente!.image != null
-                ? Image.network(cliente!.image!, fit: BoxFit.cover)
-                : Image.asset('assets/img/user_image.png', fit: BoxFit.cover),
-          ),
-        ),
-      ),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 15),
+      //decoration: BoxDecoration(
+      //  color: Colors.white,
+      //  borderRadius: BorderRadius.circular(25),
+      //  boxShadow: [
+      //    BoxShadow(
+      //      color: Colors.black.withOpacity(0.08),
+      //      blurRadius: 12,
+      //      offset: const Offset(0, 4),
+      //    ),
+      //  ],
+      //),
+      child: child,
     );
   }
 
-  /// ✏️ Botón editar (estilo limpio y moderno)
-  Widget _editButton(BuildContext context, Color primary) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, 'profile/update', arguments: cliente);
-      },
-      child: Container(
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: primary,
-          boxShadow: [
-            BoxShadow(
-              color: primary.withOpacity(0.4),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+  // 👤 Encabezado con imagen y nombre
+  Widget _profileHeader(BuildContext context, Color primary) {
+    return Column(
+      children: [
+        Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            Container(
+              width: 180,
+              height: 180,
+              child: ClipOval(
+                child:
+                    cliente != null && cliente!.image != null
+                        ? Image.network(cliente!.image!, fit: BoxFit.cover)
+                        : Image.asset(
+                          'assets/img/no-perfil.jpg',
+                          fit: BoxFit.cover,
+                        ),
+              ),
             ),
           ],
         ),
-        child: const Icon(
-          CupertinoIcons.pencil_outline,
-          color: Colors.white,
-          size: 26,
+        const SizedBox(height: 16),
+        Text(
+          '${cliente?.name ?? ''} ${cliente?.lastname ?? ''}',
+          style: GoogleFonts.poppins(
+            color: Colors.black87,
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-      ),
+        const SizedBox(height: 4),
+        Text(
+          cliente?.email ?? '',
+          style: GoogleFonts.poppins(color: Colors.black54, fontSize: 14),
+        ),
+      ],
     );
   }
 
-  /// 💼 Tarjeta informativa refinada
-  Widget _infoCard(IconData icon, String title, String subtitle) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+  // 🔹 Item de información con ícono + texto
+  Widget _infoItem(IconData icon, String value, String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Ícono decorativo
           Container(
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: AppTheme.primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            padding: const EdgeInsets.all(12),
-            child: Icon(
-              icon,
-              color: AppTheme.primaryColor,
-              size: 24,
-            ),
+            child: Icon(icon, color: AppTheme.primaryColor, size: 22),
           ),
-
-          const SizedBox(width: 16),
-
-          // Texto principal
+          const SizedBox(width: 18),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  subtitle,
+                  label,
                   style: GoogleFonts.poppins(
-                    fontSize: 13,
                     color: Colors.grey[600],
+                    fontSize: 13,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  title.isNotEmpty ? title : 'Sin información',
+                  value.isNotEmpty ? value : 'Sin información',
                   style: GoogleFonts.poppins(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
                     color: Colors.black87,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ✏️ Botón moderno para editar perfil
+  Widget _editProfileButton(BuildContext context, Color primary) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: primary,
+        elevation: 6,
+        shadowColor: primary.withOpacity(0.3),
+        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+      ),
+      onPressed: () {
+        Navigator.pushNamed(context, 'profile/update', arguments: cliente);
+      },
+      child: Text(
+        "Editar Perfil",
+        style: GoogleFonts.poppins(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+        ),
       ),
     );
   }

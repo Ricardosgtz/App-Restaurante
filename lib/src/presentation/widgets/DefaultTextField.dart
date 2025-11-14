@@ -41,8 +41,7 @@ class _DefaultTextFieldState extends State<DefaultTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final primary = AppTheme.primaryColor; // 👈 usa tu color principal
-
+    final primary = AppTheme.primaryColor;
     final textStyle = GoogleFonts.poppins(
       fontSize: 16,
       color: Colors.black87,
@@ -55,8 +54,8 @@ class _DefaultTextFieldState extends State<DefaultTextField> {
         children: [
           TextFormField(
             obscureText: _obscure,
-            controller: widget.controller, // 🔥 Usar controller si está presente
-            initialValue: widget.controller == null ? widget.initialValue : null, // 🔥 Solo usar initialValue si NO hay controller
+            controller: widget.controller, 
+            initialValue: widget.controller == null ? widget.initialValue : null,
             onChanged: widget.onChanged,
             keyboardType: widget.textInputType,
             validator: widget.validator,

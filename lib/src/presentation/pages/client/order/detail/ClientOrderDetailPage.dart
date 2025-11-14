@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Página de detalle del pedido del cliente
 class ClientOrderDetailPage extends StatefulWidget {
@@ -36,6 +37,7 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = ModalRoute.of(context)!.settings.arguments as Order;
       _loadOrderDetail(args.id);
+      _checkAndShowHint();
     });
   }
 
@@ -51,6 +53,128 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage>
     _animationController.dispose();
     super.dispose();
   }
+
+  Future<void> _checkAndShowHint() async {
+  final prefs = await SharedPreferences.getInstance();
+  final hasSeenHint = prefs.getBool('hasSeenOrderDetailHint') ?? false;
+
+  if (!hasSeenHint) {
+    await Future.delayed(const Duration(milliseconds: 600));
+    _showHintDialog(context);
+    prefs.setBool('hasSeenOrderDetailHint', true);
+  }
+}
+
+void _showHintDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22),
+        ),
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Ícono circular con degradado naranja
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [Colors.orange, Colors.deepOrangeAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.receipt_long_rounded,
+                  color: Colors.white,
+                  size: 42,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Título
+              Text(
+                'Detalles del pedido',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Texto explicativo
+              Column(
+                children: [
+                  Text(
+                    'Aquí puedes consultar toda la información de tu pedido, '
+                    'incluyendo los productos, dirección, método de entrega y estado.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13.5,
+                      color: Colors.grey[700],
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Desliza hacia abajo para ver más detalles',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.orange,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Botón "Entendido"
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 25,
+                      vertical: 12,
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'Entendido',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
 
   Future<void> _loadOrderDetail(int orderId) async {
     setState(() => loading = true);
@@ -97,19 +221,7 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage>
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: HomeAppBar(title: 'Detalles del Pedido'),
-      body: Stack(
-        children: [
-          _buildMainContent(),
-          _buildBottomPanel(),
-
-          Positioned(
-            right: 20, // distancia desde el borde derecho
-            bottom:
-                28, // 👈 súbelo para no tapar el total (ajusta si lo necesitas)
-            child: _buildTogglePanelButton(),
-          ),
-        ],
-      ),
+      body: Stack(children: [_buildMainContent(), _buildBottomPanel()]),
     );
   }
 
@@ -183,7 +295,7 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage>
     );
   }
 
-  /// Contenido principal de la página (solo los productos tienen scroll)
+  /// Contenido principal de la página
   Widget _buildMainContent() {
     final formattedDate = DateFormat(
       'd MMM yyyy, h:mm a',
@@ -205,7 +317,7 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage>
           _buildProductsSectionTitle(),
           const SizedBox(height: 12),
 
-          // 🔹 Solo la lista de productos hace scroll
+          // productos scroll
           Expanded(
             child:
                 order!.orderdetails.isEmpty
@@ -406,18 +518,19 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage>
   }
 
   /// Panel inferior deslizable
-  /// Panel inferior deslizable
   Widget _buildBottomPanel() {
-    // ⚙️ Altura dinámica del panel según el tipo de pedido
+    // Altura dinámica del panel según el tipo de pedido
     final double panelHeight =
         (order?.order.type == 'domicilio')
-            ? 500
-            : 400; // ajusta según tu diseño
+            ? 425.0
+            : (order?.order.type == 'anticipado')
+            ? 410.0
+            : 315.0; // ajusta según tu diseño
 
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 350),
       curve: Curves.easeInOut,
-      bottom: isPanelVisible ? 0 : -panelHeight, // ✅ dinámico
+      bottom: isPanelVisible ? 0 : -panelHeight,
       left: 0,
       right: 0,
       child: GestureDetector(
@@ -455,19 +568,19 @@ class _ClientOrderDetailPageState extends State<ClientOrderDetailPage>
   }
 
   /// Botón flotante para mostrar/ocultar el panel
-  Widget _buildTogglePanelButton() {
-    return FloatingActionButton(
-      onPressed: _togglePanel,
-      backgroundColor: Colors.orange,
-      child: AnimatedRotation(
-        turns: isPanelVisible ? 0.5 : 0,
-        duration: const Duration(milliseconds: 300),
-        child: const Icon(
-          Icons.expand_more_rounded,
-          color: Colors.white,
-          size: 32,
-        ),
-      ),
-    );
-  }
+  //Widget _buildTogglePanelButton() {
+  //  return FloatingActionButton(
+  //    onPressed: _togglePanel,
+  //    backgroundColor: Colors.orange,
+  //    child: AnimatedRotation(
+  //      turns: isPanelVisible ? 0.5 : 0,
+  //      duration: const Duration(milliseconds: 300),
+  //      child: const Icon(
+  //        Icons.expand_more_rounded,
+  //        color: Colors.white,
+  //        size: 32,
+  //      ),
+  //    ),
+  //  );
+  //}
 }

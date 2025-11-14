@@ -36,7 +36,10 @@ class ClientAddressListItem extends StatelessWidget {
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeInOut,
           decoration: BoxDecoration(
-            color: isSelected ? primary : Colors.white, // 🔥 cambia color al seleccionar
+            color:
+                isSelected
+                    ? primary
+                    : Colors.white, // cambia color al seleccionar
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -54,7 +57,7 @@ class ClientAddressListItem extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 🏷️ Contenido de texto
+                    // Contenido de texto
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +98,9 @@ class ClientAddressListItem extends StatelessWidget {
                                 CupertinoIcons.map_pin_ellipse,
                                 size: 14,
                                 color:
-                                    isSelected ? Colors.white70 : Colors.grey[600],
+                                    isSelected
+                                        ? Colors.white70
+                                        : Colors.grey[600],
                               ),
                               const SizedBox(width: 6),
                               Expanded(
@@ -105,9 +110,10 @@ class ClientAddressListItem extends StatelessWidget {
                                       : "Sin referencia",
                                   style: GoogleFonts.poppins(
                                     fontSize: 13.3,
-                                    color: isSelected
-                                        ? Colors.white70
-                                        : Colors.grey.shade600,
+                                    color:
+                                        isSelected
+                                            ? Colors.white70
+                                            : Colors.grey.shade600,
                                   ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -133,15 +139,14 @@ class ClientAddressListItem extends StatelessWidget {
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isSelected
-                          ? Colors.white.withOpacity(0.25)
-                          : Colors.redAccent.withOpacity(0.15),
+                      color:
+                          isSelected
+                              ? Colors.white.withOpacity(0.25)
+                              : Colors.redAccent.withOpacity(0.15),
                     ),
                     child: Icon(
                       CupertinoIcons.trash_fill,
-                      color: isSelected
-                          ? Colors.white
-                          : Colors.redAccent,
+                      color: isSelected ? Colors.white : Colors.redAccent,
                       size: 20,
                     ),
                   ),

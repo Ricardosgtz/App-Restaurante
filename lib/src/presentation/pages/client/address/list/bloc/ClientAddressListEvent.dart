@@ -1,8 +1,6 @@
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/src/domain/models/Address.dart';
-
 
 abstract class ClientAddressListEvent extends Equatable {
   const ClientAddressListEvent();
@@ -28,7 +26,7 @@ class ChangeRadioValue extends ClientAddressListEvent {
 class SetAddressSession extends ClientAddressListEvent {
   final List<Address> addressList;
 
-  const SetAddressSession({ required this.addressList });
+  const SetAddressSession({required this.addressList});
 
   @override
   List<Object?> get props => [addressList];

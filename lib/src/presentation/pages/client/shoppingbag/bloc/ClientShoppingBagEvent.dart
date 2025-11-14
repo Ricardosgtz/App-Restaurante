@@ -46,7 +46,6 @@ class ConfirmOrder extends ClientShoppingBagEvent {
   final String orderType;
   final String? note;
   final List<Map<String, dynamic>> items;
-  
 
   const ConfirmOrder({
     required this.clientId,

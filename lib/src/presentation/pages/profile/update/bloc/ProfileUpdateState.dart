@@ -26,9 +26,9 @@ class ProfileUpdateState extends Equatable {
 
   toUser() => Cliente(
     id: id,
-    name: name.value, 
-    lastname: lastname.value, 
-    phone: phone.value
+    name: name.value,
+    lastname: lastname.value,
+    phone: phone.value,
   );
 
   ProfileUpdateState copyWith({

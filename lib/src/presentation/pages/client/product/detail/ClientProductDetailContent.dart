@@ -10,7 +10,7 @@ import 'package:flutter_application_1/src/presentation/utils/AlertHelper.dart';
 import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// 🛍️ Importar el ClientShoppingBagBloc para actualizar el contador
+//Importar el ClientShoppingBagBloc para actualizar el contador
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagBloc.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagEvent.dart';
 
@@ -19,7 +19,12 @@ class ClientProductDetailContent extends StatelessWidget {
   final ClientProductDetailBloc? bloc;
   final ClientProductDetailState state;
 
-  const ClientProductDetailContent(this.bloc, this.state, this.product, {super.key});
+  const ClientProductDetailContent(
+    this.bloc,
+    this.state,
+    this.product, {
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +38,15 @@ class ClientProductDetailContent extends StatelessWidget {
           children: [
             const SizedBox(height: 30),
 
-            // 🖼 Imagen principal con borde anaranjado y sombra suave
+            // Imagen principal con borde anaranjado y sombra suave
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 22),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(28),
                 border: Border.all(
-                  color: Colors.orangeAccent.withOpacity(0.9), // 🟠 Borde anaranjado
+                  color: Colors.orangeAccent.withOpacity(
+                    0.9,
+                  ), // Borde anaranjado
                   width: 3,
                 ),
                 boxShadow: [
@@ -70,7 +77,7 @@ class ClientProductDetailContent extends StatelessWidget {
 
             const SizedBox(height: 30),
 
-            // 🧾 Tarjeta de detalle limpia
+            // Tarjeta de detalle limpia
             Container(
               width: size.width * 0.93,
               margin: const EdgeInsets.only(bottom: 40),
@@ -114,7 +121,7 @@ class ClientProductDetailContent extends StatelessWidget {
                       height: 1.6,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
                   // Precio
                   Row(
@@ -131,7 +138,7 @@ class ClientProductDetailContent extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 25),
 
                   // Controles
                   _actionsShoppingBag(context),
@@ -144,40 +151,38 @@ class ClientProductDetailContent extends StatelessWidget {
     );
   }
 
-  // 🖼 Imagen del producto
+  // Imagen del producto
   Widget _productImage(String? imageUrl) {
     if (imageUrl != null && imageUrl.isNotEmpty) {
       return Container(
         color: Colors.white,
         child: FadeInImage.assetNetwork(
-          placeholder: 'assets/img/no-image.png',
+          placeholder: 'assets/img/sin-imagen.jpg',
           image: imageUrl,
           fit: BoxFit.cover,
         ),
       );
     } else {
-      return Image.asset('assets/img/no-image.png', fit: BoxFit.cover);
+      return Image.asset('assets/img/sin-imagen.jpg', fit: BoxFit.cover);
     }
   }
 
-  // 🛒 Controles y botón agregar
+  // Controles y botón agregar
   Widget _actionsShoppingBag(BuildContext context) {
     final primary = AppTheme.primaryColor;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // 🔘 Controles cantidad
+        // Controles cantidad
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
           child: Row(
             children: [
-              _iconButton(CupertinoIcons.minus, () => bloc?.add(SubtractItem())),
+              _iconButton(
+                CupertinoIcons.minus,
+                () => bloc?.add(SubtractItem()),
+              ),
               const SizedBox(width: 20),
               Text(
                 state.quantity.toString(),
@@ -193,7 +198,7 @@ class ClientProductDetailContent extends StatelessWidget {
           ),
         ),
 
-        // 🟢 Botón agregar moderno
+        // Botón agregar moderno
         GestureDetector(
           onTap: () => _handleAddToCart(context),
           child: Container(
@@ -240,43 +245,32 @@ class ClientProductDetailContent extends StatelessWidget {
     );
   }
 
-// 🛍 Manejador para agregar al carrito con confirmación
-Future<void> _handleAddToCart(BuildContext context) async {
-  // 🔹 Mostrar confirmación
-  final result = await AlertHelper.showConfirmationDialog(
-    context: context,
-    title: "Agregar producto",
-    message: "¿Deseas añadir este producto a tu bolsa?",
-    confirmText: "Agregar",
-    cancelText: "Cancelar",
-    //iconType: "cart", // 🛒 Usa el ícono de carrito
-  );
+  // Manejador para agregar al carrito con confirmación
+  Future<void> _handleAddToCart(BuildContext context) async {
+    // Mostrar confirmación
+    final result = await AlertHelper.showConfirmationDialog(
+      context: context,
+      title: "Agregar producto",
+      message: "¿Deseas añadir este producto a tu bolsa?",
+      confirmText: "Agregar",
+      cancelText: "Cancelar",
+    );
 
-  // ✅ Solo si el usuario confirma
-  if (result == true) {
-    bloc?.add(AddProductToShoppingBag(product: product!));
+    // Solo si el usuario confirma
+    if (result == true) {
+      bloc?.add(AddProductToShoppingBag(product: product!));
 
-    // 🕐 Pequeña pausa para asegurar que se guarde
-    await Future.delayed(const Duration(milliseconds: 300));
+      // Pequeña pausa para asegurar que se guarde
+      await Future.delayed(const Duration(milliseconds: 300));
 
-    // 🔄 Actualiza la bolsa de compras
-    if (context.mounted) {
-      context.read<ClientShoppingBagBloc>().add(GetShoppingBag());
+      // Actualiza la bolsa de compras
+      if (context.mounted) {
+        context.read<ClientShoppingBagBloc>().add(GetShoppingBag());
+      }
     }
-
-    // 🎉 Mostrar alerta de éxito
-    //await AlertHelper.showAlertDialog(
-    //  context: context,
-    //  title: "¡Agregado con éxito!",
-    //  message: "El producto se añadió a tu bolsa.",
-    //  isSuccess: true,
-      //iconType: "cart",
-    //);
   }
-}
 
-
-  // 🔘 Botón de ícono minimalista
+  //Botón de ícono minimalista
   Widget _iconButton(IconData icon, VoidCallback onTap) {
     final primary = AppTheme.primaryColor;
 

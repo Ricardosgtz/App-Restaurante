@@ -41,7 +41,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<bool> logout() async {
     try {
-      // 🔥 Lista de todas las claves a eliminar
+      // Lista de todas las claves a eliminar
       final keysToRemove = [
         'cliente',       // Usuario principal
         'address',       // Dirección activa
@@ -54,28 +54,19 @@ class AuthRepositoryImpl implements AuthRepository {
       for (String key in keysToRemove) {
         final result = await sharedPref.remove(key);
         if (!result) {
-          print('⚠️ WARNING - No se pudo eliminar la clave: $key');
           allSuccess = false;
-        } else {
-          print('✅ Clave eliminada: $key');
         }
       }
 
-      // Debug: Verificar que todo se eliminó
-      print('🔍 LOGOUT - Limpieza completa: $allSuccess');
-      
       // Verificación adicional: intentar leer 'cliente'
       final clienteData = await sharedPref.read('cliente');
       if (clienteData != null) {
-        print('❌ ERROR - La clave "cliente" aún existe después del logout');
         return false;
       }
-      
-      print('✅ LOGOUT - Sesión eliminada correctamente');
       return allSuccess;
       
     } catch (e) {
-      print('❌ ERROR en logout: $e');
+      print('ERROR en logout: $e');
       return false;
     }
   }

@@ -35,7 +35,7 @@ class ClientProductListBloc
     final response = await productsUseCases.getProductsByCategory.run(
       idCategory: event.idCategory,
       context: event.context,
-      forceRefresh: true, // 👈 ¡clave!
+      forceRefresh: true,
     );
     emit(state.copyWith(response: response));
   }

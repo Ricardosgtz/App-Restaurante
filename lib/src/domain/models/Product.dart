@@ -14,6 +14,7 @@ class Product {
   double price;
   int? quantity;
   final bool available;
+  final bool deleted;
 
   Product({
     this.id,
@@ -24,7 +25,8 @@ class Product {
     required this.idCategory,
     required this.price,
     this.quantity,
-    required this.available
+    required this.available,
+    this.deleted = false,
   });
 
   static List<Product> fromJsonList(List<dynamic> jsonList) {
@@ -54,6 +56,7 @@ class Product {
             : json["price"],
       quantity: json["quantity"],
      available: json['available'] ?? true,
+     deleted: json['deleted'] ?? false,
   );
 
   Map<String, dynamic> toJson() => {
@@ -66,5 +69,6 @@ class Product {
     "price": price,
     "quantity": quantity,
     'available': available,
+    'deleted': deleted,
   };
 }

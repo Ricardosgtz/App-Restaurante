@@ -13,7 +13,8 @@ class ClientAddressCreatePage extends StatefulWidget {
   const ClientAddressCreatePage({super.key});
 
   @override
-  State<ClientAddressCreatePage> createState() => _ClientAddressCreatePageState();
+  State<ClientAddressCreatePage> createState() =>
+      _ClientAddressCreatePageState();
 }
 
 class _ClientAddressCreatePageState extends State<ClientAddressCreatePage> {
@@ -30,22 +31,18 @@ class _ClientAddressCreatePageState extends State<ClientAddressCreatePage> {
           final responseState = state.response;
 
           if (responseState is Success) {
-            // Actualiza la lista de direcciones
             context.read<ClientAddressListBloc>().add(GetUserAddress(context));
 
-            // Muestra AlertDialog de éxito
             await AlertHelper.showAlertDialog(
               context: context,
               title: "¡Éxito!",
               message: "La dirección fue creada correctamente.",
               isSuccess: true,
               onClose: () {
-                Navigator.pop(context); // Regresa a la lista de direcciones
+                Navigator.pop(context);
               },
             );
-          } 
-          else if (responseState is Error) {
-            // Muestra AlertDialog de error
+          } else if (responseState is Error) {
             await AlertHelper.showAlertDialog(
               context: context,
               title: "Error",

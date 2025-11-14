@@ -30,12 +30,12 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
     _loadPayment();
   }
 
-  /// ✅ Este método se ejecuta si Flutter reutiliza el mismo widget para otra orden
+  /// Este método se ejecuta si Flutter reutiliza el mismo widget para otra orden
   @override
   void didUpdateWidget(covariant ClientOrderListItem oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.order.id != widget.order.id) {
-      // 🔄 Reiniciar el estado del pago cuando cambia la orden
+      // Reiniciar el estado del pago cuando cambia la orden
       setState(() {
         _payment = null;
         _isLoadingPayment = true;
@@ -73,7 +73,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
       'es_MX',
     ).format(widget.order.createdAt);
 
-    // 🎨 Colores e íconos según estado del PEDIDO
+    // Colores e íconos según estado del PEDIDO
     final Map<String, Map<String, dynamic>> statusMap = {
       'pendiente': {'color': Colors.orangeAccent, 'icon': Icons.schedule},
       'confirmada': {
@@ -117,12 +117,12 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
           ],
         ),
 
-        // 🟧 Franja lateral + contenido
+        // Franja lateral + contenido
         child: ClipRRect(
           borderRadius: BorderRadius.circular(22),
           child: Stack(
             children: [
-              // 🟩 Franja lateral degradada
+              // Franja lateral degradada
               Positioned(
                 left: 0,
                 top: 0,
@@ -143,13 +143,13 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
                 ),
               ),
 
-              // 📦 Contenido principal
+              // Contenido principal
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 🧾 Header — Pedido + Total
+                    // Header — Pedido + Total
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -165,7 +165,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              'Pedido #${widget.order.id}',
+                              'Pedido #${widget.order.id} - ${widget.order.order.type}',
                               style: GoogleFonts.outfit(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 17,
@@ -174,7 +174,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
                             ),
                           ],
                         ),
-                        // 💰 Total
+                        // Total
                         Text(
                           '\$${widget.order.total.toStringAsFixed(2)}',
                           style: GoogleFonts.outfit(
@@ -190,13 +190,13 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
                     Divider(color: Colors.grey[200], thickness: 1),
                     const SizedBox(height: 10),
 
-                    // 🏪 Restaurante
+                    // Restaurante
                     Row(
                       children: [
-                        const Icon(
-                          Icons.storefront_rounded,
+                        Icon(
+                          Icons.storefront_outlined,
                           size: 18,
-                          color: Colors.orange,
+                          color: Colors.grey[800],
                         ),
                         const SizedBox(width: 8),
                         Expanded(
@@ -215,15 +215,15 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
 
                     const SizedBox(height: 6),
 
-                    // 📍 Dirección
-                    if (widget.order.address != null)
+                    // Dirección (solo para domicilio)
+                    if (widget.order.address != null) ...[
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.location_on_outlined,
                             size: 18,
-                            color: Colors.redAccent,
+                            color: Colors.grey[800],
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -239,16 +239,45 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 6),
+                    ],
 
-                    const SizedBox(height: 6),
+                    // Hora de llegada (solo para anticipadas)
+                    if (widget.order.arrivalTime != null &&
+                        widget.order.arrivalTime!.isNotEmpty) ...[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.access_time_rounded,
+                            size: 18,
+                            color: Colors.grey[800],
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Hora de llegada: ${widget.order.arrivalTime!}',
+                              style: GoogleFonts.outfit(
+                                fontSize: 13.5,
+                                color: Colors.grey[700],
+                                fontWeight: FontWeight.w600,
+                                height: 1.3,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                    ],
 
-                    // 📅 Fecha
+                    // Fecha
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.calendar_today_rounded,
                           size: 16,
-                          color: Colors.blueAccent,
+                          color: Colors.grey[800],
                         ),
                         const SizedBox(width: 6),
                         Text(
@@ -263,7 +292,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
 
                     const SizedBox(height: 14),
 
-                    // 🏷️ ESTADOS: Pedido y Pago
+                    // ESTADOS: Pedido y Pago
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -468,7 +497,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
     );
   }
 
-  // 🎨 Método para obtener el color según el estado del pago
+  // Método para obtener el color según el estado del pago
   Color _getPaymentStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pendiente':
@@ -484,7 +513,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
     }
   }
 
-  // 🎨 Método para obtener el icono según el estado del pago
+  // Método para obtener el icono según el estado del pago
   Widget _getPaymentStatusIcon(String status) {
     IconData iconData;
     Color iconColor = _getPaymentStatusColor(status);
@@ -509,7 +538,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
     return Icon(iconData, size: 15, color: iconColor);
   }
 
-  // 📝 Método para obtener el texto según el estado del pago
+  // Método para obtener el texto según el estado del pago
   String _getPaymentStatusText(String status) {
     switch (status.toLowerCase()) {
       case 'pendiente':
@@ -525,7 +554,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
     }
   }
 
-  // 📋 Modal de detalles del pago
+  // Modal de detalles del pago
   void _showPaymentDetailsModal(BuildContext context) {
     if (_payment == null) return;
 
@@ -587,7 +616,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
                   Divider(color: Colors.grey[300]),
                   const SizedBox(height: 16),
 
-                  // 💳 Método de pago
+                  // Método de pago
                   _buildDetailRow(
                     Icons.payment_rounded,
                     'Método de pago',
@@ -597,7 +626,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
                   ),
                   const SizedBox(height: 16),
 
-                  // 📊 Estado
+                  // Estado
                   _buildDetailRow(
                     Icons.info_outline_rounded,
                     'Estado',
@@ -606,7 +635,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
                   ),
                   const SizedBox(height: 16),
 
-                  // 💰 Monto
+                  // Monto
                   _buildDetailRow(
                     Icons.attach_money_rounded,
                     'Monto',
@@ -615,14 +644,14 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
                   ),
                   const SizedBox(height: 16),
 
-                  // 📅 Fecha
+                  // Fecha
                   _buildDetailRow(
                     Icons.calendar_today_rounded,
                     'Fecha',
                     formattedDate,
                   ),
 
-                  // 📄 Comprobante (solo si es transferencia y hay comprobante)
+                  // Comprobante (solo si es transferencia y hay comprobante)
                   if (_payment!.paymentMethod.toLowerCase() ==
                           'transferencia' &&
                       _payment!.receipt != null &&
@@ -642,7 +671,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
                   Divider(color: Colors.grey[300]),
                   const SizedBox(height: 16),
 
-                  // ℹ️ Mensaje informativo según el estado
+                  // Mensaje informativo según el estado
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -675,7 +704,7 @@ class _ClientOrderListItemState extends State<ClientOrderListItem> {
 
                   const SizedBox(height: 24),
 
-                  // 🔘 Botón cerrar
+                  // Botón cerrar
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(

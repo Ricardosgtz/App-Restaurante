@@ -7,10 +7,9 @@ import 'package:http/http.dart' as http;
 
 class CategoriesService extends BaseService {
   
-  /// 📂 Obtener todas las categorías
   Future<Resource<List<Category>>> getCategories(BuildContext context) async {
     try {
-      // ✅ Validar token antes de la petición
+      //Validar token antes de la petición
       final tokenValue = await validateAndGetToken(context);
       //if (tokenValue == null) {
       //  return Error("Sesión expirada, inicia sesión nuevamente.");
@@ -21,7 +20,7 @@ class CategoriesService extends BaseService {
 
       final response = await http.get(url, headers: headers);
 
-      // ✅ Usar método centralizado para manejar la respuesta
+      //Usar método centralizado para manejar la respuesta
       return handleResponse<List<Category>>(
         response: response,
         context: context,

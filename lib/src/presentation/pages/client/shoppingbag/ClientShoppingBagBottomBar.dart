@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/config/AppTheme.dart';
@@ -23,115 +22,95 @@ class ClientShoppingBagBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = AppTheme.primaryColor;
 
-    return SafeArea(
-      top: false,
-      child: Container(
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: primary.withOpacity(0.25),
-              blurRadius: 25,
-              offset: const Offset(0, 10),
+    return Container(
+      //color: Colors.transparent, //Fondo transparente
+      child: SafeArea(
+        top: false,
+        child: Container(
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white, //Solo la píldora blanca
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: primary, //Borde anaranjado
+              width: 1.5, // Grosor del borde
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-            child: Container(
-              height: 100,
-              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withOpacity(0.92),
-                    Colors.white.withOpacity(0.85),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.6),
-                  width: 1.2,
-                ),
-              ),
-              child: Row(
-                children: [
-                  // 🧾 Total de la orden
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Total a pagar',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            color: Colors.grey.shade600,
-                            letterSpacing: 0.3,
-                          ),
+          ),
+          child: Container(
+            height: 100,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+            child: Row(
+              children: [
+                //Total de la orden
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Total a pagar',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade600,
+                          letterSpacing: 0.3,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '\$${state.total.toStringAsFixed(2)}',
-                          style: GoogleFonts.poppins(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: primary,
-                            letterSpacing: 0.5,
-                          ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        '\$${state.total.toStringAsFixed(2)}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 23,
+                          fontWeight: FontWeight.bold,
+                          color: primary,
+                          letterSpacing: 0.5,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                ),
 
-                  // 🍽 Botón confirmar con estilo brillante
-                  ElevatedButton(
-                    onPressed: onConfirmOrder,
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: primary,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 26,
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ).copyWith(
-                      backgroundColor: WidgetStateProperty.resolveWith((
-                        states,
-                      ) {
-                        if (states.contains(WidgetState.pressed)) {
-                          return primary.withOpacity(0.85);
-                        }
-                        return primary;
-                      }),
+                //Botón confirmar con estilo brillante
+                ElevatedButton(
+                  onPressed: onConfirmOrder,
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: primary,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 26,
+                      vertical: 14,
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.task_alt_rounded, // puedes cambiar por cualquiera de arriba
-                          color: Colors.white,
-                          size: 22,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Ordenar',
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
                     ),
+                  ).copyWith(
+                    backgroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.pressed)) {
+                        return primary.withOpacity(0.85);
+                      }
+                      return primary;
+                    }),
                   ),
-                ],
-              ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.task_alt_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Ordenar',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),

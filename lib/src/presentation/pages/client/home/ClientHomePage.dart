@@ -8,9 +8,8 @@ import 'package:flutter_application_1/src/presentation/pages/client/home/bloc/Cl
 import 'package:flutter_application_1/src/presentation/pages/client/home/bloc/ClientHomeEvent.dart';
 import 'package:flutter_application_1/src/presentation/widgets/HomeAppBar.dart';
 import 'package:flutter_application_1/src/presentation/widgets/HomeNavigationBar.dart';
-import 'package:flutter_application_1/src/presentation/pages/auth/login/LoginPage.dart';
 import 'package:flutter_application_1/main.dart';
-// 🛍️ Importar el ClientShoppingBagBloc
+// Importar el ClientShoppingBagBloc
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagBloc.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagEvent.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/shoppingbag/bloc/ClientShoppingBagState.dart';
@@ -28,10 +27,9 @@ class _ClientHomePageState extends State<ClientHomePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // 🛍️ Cargar los productos de la bolsa
+      // Cargar los productos de la bolsa
       context.read<ClientShoppingBagBloc>().add(GetShoppingBag());
-      
-      // 🔥 Resetear el estado de logout al iniciar
+      // Resetear el estado de logout al iniciar
       context.read<ClientHomeBloc>().add(const ResetLogoutState());
     });
   }
@@ -49,35 +47,47 @@ class _ClientHomePageState extends State<ClientHomePage> {
       'Categorías',
       'Bolsa De Compras',
       'Mis Ordenes',
-      'Perfil de Usuario'
+      'Perfil de Usuario',
     ];
 
     final List<NavigationItem> navItems = [
-      NavigationItem(icon: Icons.category_outlined, activeIcon: Icons.category, label: 'Categorías'),
-      NavigationItem(icon: Icons.shopping_bag_outlined, activeIcon: Icons.shopping_bag, label: 'Mi Bolsa'),
-      NavigationItem(icon: Icons.receipt_long_outlined, activeIcon: Icons.receipt_long, label: 'Mis Ordenes'),
-      NavigationItem(icon: Icons.person_outline, activeIcon: Icons.person, label: 'Perfil'),
+      NavigationItem(
+        icon: Icons.category_outlined,
+        activeIcon: Icons.category,
+        label: 'Categorías',
+      ),
+      NavigationItem(
+        icon: Icons.shopping_bag_outlined,
+        activeIcon: Icons.shopping_bag,
+        label: 'Mi Bolsa',
+      ),
+      NavigationItem(
+        icon: Icons.receipt_long_outlined,
+        activeIcon: Icons.receipt_long,
+        label: 'Mis Ordenes',
+      ),
+      NavigationItem(
+        icon: Icons.person_outline,
+        activeIcon: Icons.person,
+        label: 'Perfil',
+      ),
     ];
 
     return BlocListener<ClientHomeBloc, ClientHomeState>(
-      listenWhen: (previous, current) =>
-          current.isLoggedOut != previous.isLoggedOut,
+      listenWhen:
+          (previous, current) => current.isLoggedOut != previous.isLoggedOut,
       listener: (context, state) async {
         if (state.isLoggedOut) {
-          // 🔥 Esperar 1.5 segundos para que se vea la animación de loading
+          // Esperar para que se vea la animación de loading
           await Future.delayed(const Duration(milliseconds: 1500));
-          
-          // 🔥 Verificar que el contexto sigue montado
+          // Verificar que el contexto sigue montado
           if (!context.mounted) return;
-          
-          // 🔥 Resetear el estado ANTES de navegar
-          context.read<ClientHomeBloc>().add(const ResetLogoutState());
-          
-          // 🔥 Cerrar TODOS los diálogos y navegar al login en una sola operación
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            'login',
-            (route) => false,
-          );
+          // AGREGAR ESTA LÍNEA - Reinicia la app completamente
+          MyApp.restartApp(context);
+          // Navegar al login eliminando todo el stack
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil('login', (route) => false);
         }
       },
       child: BlocBuilder<ClientHomeBloc, ClientHomeState>(
@@ -88,16 +98,18 @@ class _ClientHomePageState extends State<ClientHomePage> {
             body: pages[state.pageIndex],
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
-            // 🛍️ Usamos BlocBuilder para escuchar cambios en la bolsa
-            bottomNavigationBar: BlocBuilder<ClientShoppingBagBloc, ClientShoppingBagState>(
-              builder: (context, bagState) {
-                return HomeNavigationBar(
-                  selectedIndex: state.pageIndex,
-                  items: navItems,
-                  shoppingBagCount: bagState.totalItems, // 👈 Pasamos el contador
-                );
-              },
-            ),
+            //Usamos BlocBuilder para escuchar cambios en la bolsa
+            bottomNavigationBar:
+                BlocBuilder<ClientShoppingBagBloc, ClientShoppingBagState>(
+                  builder: (context, bagState) {
+                    return HomeNavigationBar(
+                      selectedIndex: state.pageIndex,
+                      items: navItems,
+                      shoppingBagCount:
+                          bagState.totalItems,
+                    );
+                  },
+                ),
           );
         },
       ),

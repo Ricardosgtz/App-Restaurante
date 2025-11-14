@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/domain/models/Category.dart';
 import 'package:flutter_application_1/src/domain/models/Product.dart';
@@ -19,6 +20,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_application_1/src/config/AppTheme.dart';
 
 class ClientProductListPage extends StatefulWidget {
   const ClientProductListPage({super.key});
@@ -36,12 +39,141 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       if (category != null) {
-        _bloc?.add(GetProductsByCategory(
-            idCategory: category!.id!, context: context));
+        _bloc?.add(
+          GetProductsByCategory(idCategory: category!.id!, context: context),
+        );
       }
       context.read<ClientShoppingBagBloc>().add(GetShoppingBag());
+      _checkAndShowHint(); //Mostrar aviso solo una vez
     });
   }
+
+  ///Verifica si el aviso ya se mostró antes
+  Future<void> _checkAndShowHint() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenHint = prefs.getBool('hasSeenProductHint') ?? false;
+
+    if (!hasSeenHint) {
+      await Future.delayed(const Duration(milliseconds: 600)); // Pequeño delay
+      _showHintDialog(context);
+      prefs.setBool('hasSeenProductHint', true);
+    }
+  }
+
+  /// 🧭 Diálogo elegante de aviso (versión productos)
+void _showHintDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Solo se cierra con el botón
+    builder: (context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22),
+        ),
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 👁️ Ícono circular con degradado naranja
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.primaryColor,
+                      AppTheme.primaryColor.withOpacity(0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.remove_red_eye_rounded,
+                  color: Colors.white,
+                  size: 42,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              //Título principal
+              Text(
+                '¡Descubre los productos!',
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // 📝 Texto explicativo
+              Column(
+                children: [
+                  Text(
+                    'Da clic en el botón “Ver Más” dentro de cada producto '
+                    'para ver sus detalles, imagen y agregarlo a tu orden.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13.5,
+                      color: Colors.grey[700],
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Desliza hacia abajo para actualizar la lista de productos.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Botón "Entendido"
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryColor,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 25,
+                      vertical: 12,
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'Entendido',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -50,36 +182,39 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
 
     final List<NavigationItem> navItems = [
       NavigationItem(
-          icon: Icons.category_outlined,
-          activeIcon: Icons.category,
-          label: 'Categorías'),
+        icon: Icons.category_outlined,
+        activeIcon: Icons.category,
+        label: 'Categorías',
+      ),
       NavigationItem(
-          icon: Icons.shopping_bag_outlined,
-          activeIcon: Icons.shopping_bag,
-          label: 'Mi Bolsa'),
+        icon: Icons.shopping_bag_outlined,
+        activeIcon: Icons.shopping_bag,
+        label: 'Mi Bolsa',
+      ),
       NavigationItem(
-          icon: Icons.receipt_long_outlined,
-          activeIcon: Icons.receipt_long,
-          label: 'Mis Ordenes'),
+        icon: Icons.receipt_long_outlined,
+        activeIcon: Icons.receipt_long,
+        label: 'Mis Ordenes',
+      ),
       NavigationItem(
-          icon: Icons.person_outline,
-          activeIcon: Icons.person,
-          label: 'Perfil'),
+        icon: Icons.person_outline,
+        activeIcon: Icons.person,
+        label: 'Perfil',
+      ),
     ];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: HomeAppBar(title: category?.name ?? 'Productos'),
       body: BlocListener<ClientProductListBloc, ClientProductListState>(
         listener: (context, state) {
           final responseState = state.response;
           if (responseState is Success && responseState.data is bool) {
-            _bloc?.add(GetProductsByCategory(
-                idCategory: category?.id ?? -1, context: context));
-          } else if (responseState is Error) {
-            Fluttertoast.showToast(
-              msg: responseState.message,
-              toastLength: Toast.LENGTH_LONG,
-              backgroundColor: Colors.redAccent,
+            _bloc?.add(
+              GetProductsByCategory(
+                idCategory: category?.id ?? -1,
+                context: context,
+              ),
             );
           }
         },
@@ -87,14 +222,26 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
           builder: (context, state) {
             final responseState = state.response;
 
-            // 🟠 Pantalla de carga moderna
+            //Pantalla de carga moderna
             if (responseState is Loading) {
               return _buildLoadingScreen();
             }
 
-            // ✅ Cuando se cargan los productos
+            //Cuando hay un error (sin productos o error del servidor)
+            if (responseState is Error) {
+              return _buildEmptyState(responseState.message);
+            }
+
+            //Cuando se cargan los productos
             if (responseState is Success) {
               List<Product> products = responseState.data as List<Product>;
+
+              //Si la lista está vacía
+              if (products.isEmpty) {
+                return _buildEmptyState(
+                  'No hay productos disponibles en esta categoría',
+                );
+              }
 
               return RefreshIndicator(
                 color: Colors.orange,
@@ -112,8 +259,12 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
                     }
                   });
 
-                  _bloc?.add(RefreshProducts(
-                      idCategory: category!.id!, context: context));
+                  _bloc?.add(
+                    RefreshProducts(
+                      idCategory: category!.id!,
+                      context: context,
+                    ),
+                  );
                   await completer.future;
 
                   if (mounted && _bloc?.state.response is Success) {
@@ -127,24 +278,17 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
                     );
                   }
                 },
-                child: products.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'No hay productos disponibles',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                      )
-                    : ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: products.length,
-                        itemBuilder: (context, index) {
-                          return ClientProductListItem(_bloc, products[index]);
-                        },
-                      ),
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    return ClientProductListItem(_bloc, products[index]);
+                  },
+                ),
               );
             }
 
-            // Estado inicial o desconocido
+            //Estado inicial o desconocido
             return _buildLoadingScreen();
           },
         ),
@@ -159,9 +303,9 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
                 items: navItems,
                 shoppingBagCount: bagState.totalItems,
                 onItemSelected: (index) {
-                  context
-                      .read<ClientHomeBloc>()
-                      .add(ChangeDrawerPage(pageIndex: index));
+                  context.read<ClientHomeBloc>().add(
+                    ChangeDrawerPage(pageIndex: index),
+                  );
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
               );
@@ -172,7 +316,7 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
     );
   }
 
-  /// 🧡 Pantalla de carga con animación y texto moderno
+  ///Pantalla de carga con animación y texto moderno
   Widget _buildLoadingScreen() {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -196,6 +340,68 @@ class _ClientProductListPageState extends State<ClientProductListPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  ///Pantalla cuando no hay productos o hay error
+  Widget _buildEmptyState(String message) {
+    return RefreshIndicator(
+      color: Colors.orange,
+      onRefresh: () async {
+        if (category == null) return;
+
+        final completer = Completer<void>();
+        StreamSubscription<ClientProductListState>? subscription;
+
+        subscription = _bloc?.stream.listen((state) {
+          final response = state.response;
+          if (response is Success || response is Error) {
+            subscription?.cancel();
+            completer.complete();
+          }
+        });
+
+        _bloc?.add(
+          RefreshProducts(idCategory: category!.id!, context: context),
+        );
+        await completer.future;
+      },
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.7,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Text(
+                      message,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Desliza hacia abajo para actualizar',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

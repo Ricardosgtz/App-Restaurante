@@ -4,11 +4,12 @@ import 'package:flutter_application_1/src/presentation/pages/client/product/deta
 import 'package:flutter_application_1/src/presentation/pages/client/product/detail/bloc/ClientProductDetailState.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ClientProductDetailBloc extends Bloc<ClientProductDetailEvent, ClientProductDetailState> {
+class ClientProductDetailBloc
+    extends Bloc<ClientProductDetailEvent, ClientProductDetailState> {
   final ShoppingBagUseCases shoppingBagUseCases;
 
   ClientProductDetailBloc(this.shoppingBagUseCases)
-      : super(const ClientProductDetailState()) {
+    : super(const ClientProductDetailState()) {
     on<GetProducts>(_onGetProducts);
     on<AddItem>(_onAddItem);
     on<SubtractItem>(_onSubtractItem);
@@ -17,33 +18,44 @@ class ClientProductDetailBloc extends Bloc<ClientProductDetailEvent, ClientProdu
   }
 
   Future<void> _onGetProducts(
-      GetProducts event, Emitter<ClientProductDetailState> emit) async {
+    GetProducts event,
+    Emitter<ClientProductDetailState> emit,
+  ) async {
     // Obtenemos todos los productos actuales en la bolsa
     final products = await shoppingBagUseCases.getProducts.run();
     final index = products.indexWhere((p) => p.id == event.product.id);
 
-    emit(state.copyWith(
-      quantity: index != -1 ? products[index].quantity : 0,
-      shoppingBagProducts: products,
-    ));
+    emit(
+      state.copyWith(
+        quantity: index != -1 ? products[index].quantity : 0,
+        shoppingBagProducts: products,
+      ),
+    );
   }
 
   Future<void> _onAddItem(
-      AddItem event, Emitter<ClientProductDetailState> emit) async {
+    AddItem event,
+    Emitter<ClientProductDetailState> emit,
+  ) async {
     emit(state.copyWith(quantity: state.quantity + 1));
   }
 
   Future<void> _onSubtractItem(
-      SubtractItem event, Emitter<ClientProductDetailState> emit) async {
+    SubtractItem event,
+    Emitter<ClientProductDetailState> emit,
+  ) async {
     if (state.quantity > 1) {
       emit(state.copyWith(quantity: state.quantity - 1));
     }
   }
 
   Future<void> _onAddProductToShoppingBag(
-      AddProductToShoppingBag event, Emitter<ClientProductDetailState> emit) async {
-    final exists =
-        state.shoppingBagProducts.any((p) => p.id == event.product.id);
+    AddProductToShoppingBag event,
+    Emitter<ClientProductDetailState> emit,
+  ) async {
+    final exists = state.shoppingBagProducts.any(
+      (p) => p.id == event.product.id,
+    );
 
     if (!exists) {
       // Si no existe, lo agregamos a la bolsa
@@ -61,7 +73,9 @@ class ClientProductDetailBloc extends Bloc<ClientProductDetailEvent, ClientProdu
   }
 
   Future<void> _onResetState(
-      ResetState event, Emitter<ClientProductDetailState> emit) async {
+    ResetState event,
+    Emitter<ClientProductDetailState> emit,
+  ) async {
     emit(const ClientProductDetailState());
   }
 }

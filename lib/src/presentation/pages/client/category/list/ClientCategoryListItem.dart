@@ -12,175 +12,156 @@ class ClientCategoryListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const orangeColor = Color(0xFFFF9800);
+    bool _isPressed = false;
     final primaryColor = AppTheme.primaryColor;
-    final theme = Theme.of(context);
-
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: Colors.grey.shade300, // ✅ Borde gris suave
+          width: 1.2, // grosor del borde
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            blurRadius: 6,
-            offset: const Offset(0, 4),
+            color: Colors.grey.shade400.withOpacity(0.6), // ✅ sombra gris clara
+            blurRadius: 10, // qué tan difusa
+            spreadRadius: 3, // leve expansión
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Card(
-        margin: EdgeInsets.zero,
-        elevation: 4,
-        shadowColor: Colors.black26,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 🖼 Imagen de la categoría
-            Expanded(
-              flex: 6,
-              child: Container(
-                decoration: BoxDecoration(
-                  image: (category?.image != null &&
-                          category!.image!.isNotEmpty)
-                      ? DecorationImage(
-                          image: NetworkImage(category!.image!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                  color: (category?.image == null || category!.image!.isEmpty)
-                      ? primaryColor.withOpacity(0.08)
-                      : null,
-                ),
-                child: (category?.image == null || category!.image!.isEmpty)
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.restaurant_menu,
-                              size: 36,
-                              color: primaryColor.withOpacity(0.7),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Sin imagen',
-                              style: GoogleFonts.poppins(
-                                color: primaryColor.withOpacity(0.7),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : null,
-              ),
-            ),
 
-            // 📄 Contenido (nombre, descripción y botón)
-            Expanded(
-              flex: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // 🔸 Imagen de la categoría
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                width: 100,
+                height: 100,
                 decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
                   gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
                     colors: [
-                      Colors.white,
-                      primaryColor.withOpacity(0.05),
+                      primaryColor.withOpacity(0.25),
+                      primaryColor.withOpacity(0.25),
                     ],
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 🔹 Nombre
-                    Text(
-                      category?.name ?? '',
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: theme.textTheme.titleLarge?.color ??
-                            Colors.grey.shade800,
-                        letterSpacing: 0.3,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-
-                    // 📝 Descripción
-                    Expanded(
-                      child: Text(
-                        category?.description ?? '',
-                        style: GoogleFonts.poppins(
-                          color: Colors.grey[700],
-                          fontSize: 11.5,
-                          height: 1.4,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-
-                    // 🍽 Botón “Ver menú”
-                    Align(
-                      alignment: Alignment.bottomLeft,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            'client/product/list',
-                            arguments: category,
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 8),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                primaryColor,
-                                const Color(0xFFFFB300),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(15),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.orange.withOpacity(0.4),
-                                blurRadius: 6,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.fastfood_rounded,
-                                size: 14,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                'Ver menú',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
+                child:
+                    category?.image != null && category!.image!.isNotEmpty
+                        ? Image.network(
+                          category!.image!,
+                          fit: BoxFit.cover,
+                          errorBuilder:
+                              (_, __, ___) => Icon(
+                                Icons.photo,
+                                color: Colors.white,
+                                size: 50,
+                              ),
+                        )
+                        : Icon(
+                          Icons.photo,
+                          color: Colors.grey,
+                          size: 50,
+                        ),
+              ),
+            ),
+
+            const SizedBox(width: 18),
+
+            // 🔸 Texto y botón
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    category?.name ?? 'Categoría',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: AppTheme.primaryColor,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    category?.description ??
+                        'Descubre deliciosas opciones disponibles.',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.left,
+                    //maxLines: 2,
+                    //overflow: TextOverflow.ellipsis,
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // 🔸 Botón “Ver más”
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          'client/product/list',
+                          arguments: category,
+                        );
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              _isPressed
+                                  ? AppTheme.primaryColor.withOpacity(0.2)
+                                  : AppTheme.primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Ver Mas',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.primaryColor,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 16,
+                              color: AppTheme.primaryColor,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

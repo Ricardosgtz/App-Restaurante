@@ -4,7 +4,6 @@ import 'package:flutter_application_1/src/presentation/pages/profile/info/bloc/P
 import 'package:flutter_application_1/src/presentation/pages/profile/info/bloc/ProfileInfoState.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 class ProfileInfoPage extends StatefulWidget {
   const ProfileInfoPage({super.key});
 
@@ -16,6 +15,7 @@ class _ProfileInfoPageState extends State<ProfileInfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: BlocBuilder<ProfileInfoBloc, ProfileInfoState>(
         builder: (context, state) {
           return ProfileInfoContent(state.cliente);

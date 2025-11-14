@@ -1,4 +1,3 @@
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter_application_1/src/domain/models/Product.dart';
 
@@ -14,7 +13,7 @@ class ResetState extends ClientProductDetailEvent {
 
 class GetProducts extends ClientProductDetailEvent {
   final Product product;
-  const GetProducts({ required this.product });
+  const GetProducts({required this.product});
   @override
   List<Object?> get props => [product];
 }

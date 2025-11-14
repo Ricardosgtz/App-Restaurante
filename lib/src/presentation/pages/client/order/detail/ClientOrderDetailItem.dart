@@ -19,9 +19,7 @@ class ClientOrderDetailItem extends StatelessWidget {
         children: [
           _buildProductImage(),
           const SizedBox(width: 16),
-          Expanded(
-            child: _buildProductInfo(),
-          ),
+          Expanded(child: _buildProductInfo()),
           const SizedBox(width: 12),
           _buildPriceSection(),
         ],
@@ -34,10 +32,7 @@ class ClientOrderDetailItem extends StatelessWidget {
     return BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(18),
-      border: Border.all(
-        color: Colors.grey[200]!,
-        width: 1.5,
-      ),
+      border: Border.all(color: Colors.grey[200]!, width: 1.5),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.05),
@@ -70,16 +65,17 @@ class ClientOrderDetailItem extends StatelessWidget {
           height: 75,
           fit: BoxFit.cover,
           fadeInDuration: const Duration(milliseconds: 400),
-          imageErrorBuilder: (context, error, stackTrace) => Container(
-            width: 75,
-            height: 75,
-            color: Colors.grey[100],
-            child: Icon(
-              Icons.image_not_supported_outlined,
-              color: Colors.grey[400],
-              size: 32,
-            ),
-          ),
+          imageErrorBuilder:
+              (context, error, stackTrace) => Container(
+                width: 75,
+                height: 75,
+                color: Colors.grey[100],
+                child: Icon(
+                  Icons.image_not_supported_outlined,
+                  color: Colors.grey[400],
+                  size: 32,
+                ),
+              ),
         ),
       ),
     );
@@ -118,19 +114,11 @@ class ClientOrderDetailItem extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.orange[200]!,
-          width: 1,
-        ),
+        border: Border.all(color: Colors.orange[200]!, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          //Icon(
-          //  Icons.shopping_basket_rounded,
-          //  size: 14,
-          //  color: Colors.orange[800],
-          //),
           const SizedBox(width: 5),
           Text(
             'Cantidad:',
@@ -178,11 +166,7 @@ class ClientOrderDetailItem extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.attach_money_rounded,
-            size: 14,
-            color: Colors.grey[600],
-          ),
+          Icon(Icons.attach_money_rounded, size: 14, color: Colors.grey[600]),
           Text(
             '${detail.unitPrice}',
             style: GoogleFonts.poppins(
@@ -207,10 +191,7 @@ class ClientOrderDetailItem extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: Colors.green[300]!,
-          width: 1.5,
-        ),
+        border: Border.all(color: Colors.green[300]!, width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.green.withOpacity(0.2),
@@ -222,11 +203,7 @@ class ClientOrderDetailItem extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.check_circle_rounded,
-            size: 14,
-            color: Colors.green[700],
-          ),
+          Icon(Icons.check_circle_rounded, size: 14, color: Colors.green[700]),
           const SizedBox(width: 4),
           Text(
             '\$${detail.subtotal.toStringAsFixed(2)}',

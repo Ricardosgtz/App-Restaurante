@@ -4,29 +4,30 @@ import 'package:flutter_application_1/src/presentation/pages/client/home/bloc/Cl
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ClientHomeBloc extends Bloc<ClientHomeEvent, ClientHomeState> {
-
   AuthUseCases authUseCases;
 
-  ClientHomeBloc(this.authUseCases): super(ClientHomeState()) {
+  ClientHomeBloc(this.authUseCases) : super(ClientHomeState()) {
     on<ChangeDrawerPage>(_onChangeDrawerPage);
     on<Logout>(_onLogout);
     on<ResetLogoutState>(_onResetLogoutState);
   }
 
-  Future<void> _onChangeDrawerPage(ChangeDrawerPage event, Emitter<ClientHomeState> emit) async {
-    emit(
-      state.copyWith(
-        pageIndex: event.pageIndex
-      )
-    );
+  Future<void> _onChangeDrawerPage(
+    ChangeDrawerPage event,
+    Emitter<ClientHomeState> emit,
+  ) async {
+    emit(state.copyWith(pageIndex: event.pageIndex));
   }
 
   Future<void> _onLogout(Logout event, Emitter<ClientHomeState> emit) async {
     await authUseCases.logout.run();
-     emit(state.copyWith(isLoggedOut: true));
+    emit(state.copyWith(isLoggedOut: true));
   }
 
-   Future<void> _onResetLogoutState(ResetLogoutState event, Emitter<ClientHomeState> emit) async {
+  Future<void> _onResetLogoutState(
+    ResetLogoutState event,
+    Emitter<ClientHomeState> emit,
+  ) async {
     emit(state.copyWith(isLoggedOut: false));
   }
 }

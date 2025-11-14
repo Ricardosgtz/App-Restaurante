@@ -14,8 +14,10 @@ class ClientOrderDetailBottom extends StatelessWidget {
   Widget build(BuildContext context) {
     if (order == null) return const SizedBox();
 
-    final formattedDate =
-        DateFormat('d MMM yyyy, h:mm a', 'es_MX').format(order!.createdAt);
+    final formattedDate = DateFormat(
+      'd MMM yyyy, h:mm a',
+      'es_MX',
+    ).format(order!.createdAt);
 
     final statusInfo = _getStatusInfo(order!.status.name.toLowerCase());
 
@@ -28,13 +30,24 @@ class ClientOrderDetailBottom extends StatelessWidget {
         children: [
           _buildDragHandle(),
           const SizedBox(height: 16),
-          
+
           _buildInfoCard(
             icon: Icons.calendar_today_outlined,
             title: "Fecha del pedido",
             value: formattedDate,
           ),
           const SizedBox(height: 12),
+
+          // Mostrar hora de llegada solo si existe (órdenes anticipadas)
+          if (order!.arrivalTime != null && order!.arrivalTime!.isNotEmpty) ...[
+            _buildInfoCard(
+              icon: Icons.access_time_rounded,
+              title: "Hora de llegada",
+              value: order!.arrivalTime!,
+              //color: Colors.deepOrange,
+            ),
+            const SizedBox(height: 12),
+          ],
 
           if (order!.address != null) ...[
             _buildInfoCard(
@@ -119,62 +132,59 @@ class ClientOrderDetailBottom extends StatelessWidget {
 
   /// Divisor visual
   Widget _buildDivider() {
-    return Divider(
-      thickness: 1.5,
-      color: Colors.grey[200],
-    );
+    return Divider(thickness: 1.5, color: Colors.grey[200]);
   }
 
-  /// Sección del total con diseño destacado
   /// Sección del total con diseño compacto y elegante
-Widget _buildTotalSection() {
-  return LayoutBuilder(
-    builder: (context, constraints) {
-      return Align(
-        alignment: Alignment.bottomLeft,
-        child: Container(
-          width: constraints.maxWidth * 0.52,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-          decoration: BoxDecoration(
-            color: Colors.green[50],
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.green[300]!, width: 1.5),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.payments_rounded,
-                      color: Colors.green[700], size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Total:",
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      color: Colors.black87,
+  Widget _buildTotalSection() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Align(
+          alignment: Alignment.bottomLeft,
+          child: Container(
+            width: constraints.maxWidth * 0.52,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+            decoration: BoxDecoration(
+              color: Colors.green[50],
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.green[300]!, width: 1.5),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.payments_rounded,
+                      color: Colors.green[700],
+                      size: 20,
                     ),
-                  ),
-                ],
-              ),
-              Text(
-                "\$${order!.total.toStringAsFixed(2)}",
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w800,
-                  color: Colors.green[800],
-                  fontSize: 18,
+                    const SizedBox(width: 8),
+                    Text(
+                      "Total:",
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                Text(
+                  "\$${order!.total.toStringAsFixed(2)}",
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w800,
+                    color: Colors.green[800],
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
-
-
+        );
+      },
+    );
+  }
 
   /// Widget para cada tarjeta de información
   Widget _buildInfoCard({
@@ -185,7 +195,7 @@ Widget _buildTotalSection() {
     bool isStatus = false,
   }) {
     final cardColor = color ?? Colors.grey[700]!;
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -248,16 +258,9 @@ Widget _buildTotalSection() {
       decoration: BoxDecoration(
         color: color.withOpacity(0.15),
         shape: BoxShape.circle,
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 2,
-        ),
+        border: Border.all(color: color.withOpacity(0.3), width: 2),
       ),
-      child: Icon(
-        icon,
-        color: color,
-        size: 22,
-      ),
+      child: Icon(icon, color: color, size: 22),
     );
   }
 }

@@ -1,4 +1,3 @@
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/domain/models/Address.dart';
@@ -19,14 +18,14 @@ class ClientAddressCreateState extends Equatable {
     this.reference = const BlocFormItem(error: 'Ingresa la referencia'),
     this.formKey,
     this.response,
-    this.idClient = 0
+    this.idClient = 0,
   });
 
-   toAddress() => Address(
+  toAddress() => Address(
     alias: alias.value,
-    address: address.value, 
-    reference: reference.value, 
-    idClient: idClient
+    address: address.value,
+    reference: reference.value,
+    idClient: idClient,
   );
 
   ClientAddressCreateState copyWith({
@@ -35,8 +34,7 @@ class ClientAddressCreateState extends Equatable {
     BlocFormItem? reference,
     GlobalKey<FormState>? formKey,
     Resource? response,
-    int? idClient
-
+    int? idClient,
   }) {
     return ClientAddressCreateState(
       alias: alias ?? this.alias,
@@ -44,11 +42,10 @@ class ClientAddressCreateState extends Equatable {
       reference: reference ?? this.reference,
       formKey: formKey,
       response: response,
-      idClient: idClient ?? this.idClient
+      idClient: idClient ?? this.idClient,
     );
   }
 
   @override
-  // TODO: implement props
   List<Object?> get props => [alias, address, reference, response, idClient];
 }

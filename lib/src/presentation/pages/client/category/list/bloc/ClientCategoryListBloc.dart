@@ -4,25 +4,23 @@ import 'package:flutter_application_1/src/presentation/pages/client/category/lis
 import 'package:flutter_application_1/src/presentation/pages/client/category/list/bloc/ClientCategoryListState.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ClientCategoryListBloc extends Bloc<ClientCategoryListEvent, ClientCategoryListState> {
+class ClientCategoryListBloc
+    extends Bloc<ClientCategoryListEvent, ClientCategoryListState> {
+  CategoriesUseCases categoriesUseCases;
 
- CategoriesUseCases categoriesUseCases;
-
-  ClientCategoryListBloc(this.categoriesUseCases): super(ClientCategoryListState()) {
+  ClientCategoryListBloc(this.categoriesUseCases)
+    : super(ClientCategoryListState()) {
     on<GetCategories>(_onGetCategories);
-  } 
+  }
 
-  Future<void> _onGetCategories(GetCategories event, Emitter<ClientCategoryListState> emit) async {
-    emit(
-      state.copyWith(
-        response: Loading()
-      )
+  Future<void> _onGetCategories(
+    GetCategories event,
+    Emitter<ClientCategoryListState> emit,
+  ) async {
+    emit(state.copyWith(response: Loading()));
+    Resource response = await categoriesUseCases.getCategories.run(
+      event.context,
     );
-    Resource response = await categoriesUseCases.getCategories.run(event.context);
-    emit(
-      state.copyWith(
-        response: response
-      )
-    );
+    emit(state.copyWith(response: response));
   }
 }

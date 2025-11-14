@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/src/config/AppTheme.dart';
 import 'package:flutter_application_1/src/domain/models/Cliente.dart';
 import 'package:flutter_application_1/src/domain/utils/Resource.dart';
 import 'package:flutter_application_1/src/presentation/pages/profile/info/bloc/ProfileInfoBloc.dart';
@@ -44,7 +43,6 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
           final responseState = state.response;
 
           if (responseState is Error) {
-            // Mostrar error con AlertHelper
             await AlertHelper.showAlertDialog(
               context: context,
               title: "Error",
@@ -59,7 +57,6 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
               context.read<ProfileInfoBloc>().add(ProfileInfoGetUser());
             });
 
-            // Mostrar éxito con AlertHelper
             await AlertHelper.showAlertDialog(
               context: context,
               title: "¡Éxito!",
@@ -68,7 +65,7 @@ class _ProfileUpdatePageState extends State<ProfileUpdatePage> {
               onClose: () {
                 Navigator.of(
                   context,
-                ).pop(); // opcional: cerrar página si quieres
+                ).pop();
               },
             );
           }

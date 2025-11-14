@@ -12,17 +12,15 @@ class ClientOrderListBloc
   final AuthUseCases authUseCases;
 
   ClientOrderListBloc(this.ordersUseCases, this.authUseCases)
-      : super(ClientOrderListState()) {
+    : super(ClientOrderListState()) {
     on<GetOrders>(_onGetOrders);
     on<RefreshOrders>(_onRefreshOrders);
   }
 
-  /// 🔹 Obtiene las órdenes del cliente autenticado (con caché + refresco)
   Future<void> _onGetOrders(
     GetOrders event,
     Emitter<ClientOrderListState> emit,
   ) async {
-    // 🔸 1. Solo mostrar loading si no hay datos previos
     if (state.response is! Success) {
       emit(state.copyWith(response: Loading()));
     }
@@ -31,41 +29,45 @@ class ClientOrderListBloc
       final AuthResponse authResponse = await authUseCases.getUserSession.run();
       final int clientId = authResponse.cliente.id!;
 
-      // 🔹 2. Primero intenta con caché (respuesta inmediata)
-      final Resource cachedResponse = await ordersUseCases.getOrdersByClient.run(
-        clientId: clientId,
-        context: event.context,
-        forceRefresh: true, // ✅ usa caché si está vigente (5 minutos)
-      );
+      final Resource<List<dynamic>> cachedResponse = await ordersUseCases
+          .getOrdersByClient
+          .run(clientId: clientId, context: event.context, forceRefresh: false);
+
+      if (cachedResponse is Success && state.response is! Success) {
+        await Future.delayed(const Duration(milliseconds: 1000));
+      }
 
       emit(state.copyWith(response: cachedResponse));
 
-      // 🔹 3. Luego refresca en background sin bloquear la UI
-      Future.delayed(const Duration(milliseconds: 400), () async {
+      Future.microtask(() async {
         try {
-          final Resource refreshedResponse =
-              await ordersUseCases.getOrdersByClient.run(
-            clientId: clientId,
-            context: event.context,
-            forceRefresh: true, // 🔥 fuerza actualización silenciosa
-          );
+          final Resource<List<dynamic>> refreshedResponse = await ordersUseCases
+              .getOrdersByClient
+              .run(
+                clientId: clientId,
+                context: event.context,
+                forceRefresh: true,
+              );
 
-          // Solo emitir si hay cambios reales
-          if (refreshedResponse is Success &&
-              cachedResponse is Success &&
-              refreshedResponse.data != cachedResponse.data) {
-            emit(state.copyWith(response: refreshedResponse));
+          if (refreshedResponse is Success<List<dynamic>>) {
+            final newData = refreshedResponse.data;
+            final oldData =
+                (cachedResponse is Success<List<dynamic>>)
+                    ? cachedResponse.data
+                    : [];
+
+            if (newData.length != oldData.length ||
+                newData.toString() != oldData.toString()) {
+              emit(state.copyWith(response: refreshedResponse));
+            }
           }
-        } catch (e) {
-          print('⚠️ Error al refrescar en background: $e');
-        }
+        } catch (_) {}
       });
     } catch (e) {
-      emit(state.copyWith(response: Error("Error al obtener las órdenes: $e")));
+      emit(state.copyWith(response: Error('Error al obtener órdenes: $e')));
     }
   }
 
-  /// 🔄 Refresca las órdenes manualmente (pull-to-refresh o botón)
   Future<void> _onRefreshOrders(
     RefreshOrders event,
     Emitter<ClientOrderListState> emit,
@@ -74,15 +76,13 @@ class ClientOrderListBloc
       final AuthResponse authResponse = await authUseCases.getUserSession.run();
       final int clientId = authResponse.cliente.id!;
 
-      final Resource response = await ordersUseCases.getOrdersByClient.run(
-        clientId: clientId,
-        context: event.context,
-        forceRefresh: true, // ✅ en refresh manual siempre forzamos actualización
-      );
+      final Resource<List<dynamic>> response = await ordersUseCases
+          .getOrdersByClient
+          .run(clientId: clientId, context: event.context, forceRefresh: true);
 
       emit(state.copyWith(response: response));
     } catch (e) {
-      emit(state.copyWith(response: Error("Error al refrescar órdenes: $e")));
+      emit(state.copyWith(response: Error('Error al refrescar órdenes: $e')));
     }
   }
 }

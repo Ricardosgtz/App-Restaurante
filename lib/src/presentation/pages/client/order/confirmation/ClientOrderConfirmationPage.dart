@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/src/domain/models/Order.dart';
 import 'package:flutter_application_1/src/config/AppTheme.dart';
-import 'package:flutter_application_1/src/presentation/widgets/HomeAppBar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -12,9 +11,14 @@ class ClientOrderConfirmationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Order order = ModalRoute.of(context)!.settings.arguments as Order;
-    final formattedDate =
-        DateFormat('d MMMM yyyy', 'es_MX').format(order.createdAt);
+    final formattedDate = DateFormat(
+      'd MMMM yyyy',
+      'es_MX',
+    ).format(order.createdAt);
     final formattedTime = DateFormat('h:mm a', 'es_MX').format(order.createdAt);
+
+    // Calcular hora de entrega/llegada
+    final deliveryTime = _calculateDeliveryTime(order);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -37,13 +41,42 @@ class ClientOrderConfirmationPage extends StatelessWidget {
             const SizedBox(height: 10),
             _buildSuccessHero(order),
             const SizedBox(height: 30),
-            _buildStackedCards(order, formattedDate, formattedTime),
+            _buildStackedCards(
+              order,
+              formattedDate,
+              formattedTime,
+              deliveryTime,
+            ),
             const SizedBox(height: 120),
           ],
         ),
       ),
       bottomSheet: _buildBottomSheet(context),
     );
+  }
+
+  /// Calcular hora de entrega según el tipo de orden
+  String _calculateDeliveryTime(Order order) {
+    if (order.order.type == 'domicilio') {
+      // Para domicilio: hora actual + 30 minutos
+      final estimatedTime = order.createdAt.add(const Duration(minutes: 30));
+      return DateFormat('h:mm a', 'es_MX').format(estimatedTime);
+    } else if (order.arrivalTime != null && order.arrivalTime!.isNotEmpty) {
+      try {
+        final timeParts = order.arrivalTime!.split(':');
+        if (timeParts.length >= 2) {
+          final hour = int.parse(timeParts[0]);
+          final minute = int.parse(timeParts[1]);
+          final tempDateTime = DateTime(2000, 1, 1, hour, minute);
+          return DateFormat('h:mm a', 'es_MX').format(tempDateTime);
+        }
+        return order.arrivalTime!;
+      } catch (e) {
+        return order.arrivalTime!;
+      }
+    } else {
+      return '';
+    }
   }
 
   /// Hero section con diseño asimétrico
@@ -122,19 +155,22 @@ class ClientOrderConfirmationPage extends StatelessWidget {
   }
 
   /// Cards apiladas con efecto 3D
-  Widget _buildStackedCards(Order order, String date, String time) {
+  Widget _buildStackedCards(
+    Order order,
+    String date,
+    String time,
+    String deliveryTime,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
           // Card de información
-          _buildInfoCard(order, date, time),
+          _buildInfoCard(order, date, time, deliveryTime),
           const SizedBox(height: 16),
-
           // Card de productos
           _buildProductsCard(order),
           const SizedBox(height: 16),
-
           // Card de total
           _buildTotalCard(order),
         ],
@@ -143,7 +179,12 @@ class ClientOrderConfirmationPage extends StatelessWidget {
   }
 
   /// Card de información con diseño asimétrico
-  Widget _buildInfoCard(Order order, String date, String time) {
+  Widget _buildInfoCard(
+    Order order,
+    String date,
+    String time,
+    String deliveryTime,
+  ) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -200,6 +241,24 @@ class ClientOrderConfirmationPage extends StatelessWidget {
             value: time,
             color: Colors.purple,
           ),
+
+          // Mostrar hora de entrega/llegada según el tipo
+          if (deliveryTime.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildInfoGrid(
+              icon:
+                  order.order.type == 'domicilio'
+                      ? Icons.local_shipping
+                      : Icons.access_alarms,
+              label:
+                  order.order.type == 'domicilio'
+                      ? 'Hora Aproximada de entrega'
+                      : 'Hora de llegada',
+              value: deliveryTime,
+              color: Colors.deepOrange,
+            ),
+          ],
+
           const SizedBox(height: 16),
           _buildInfoGrid(
             icon: Icons.label,
@@ -239,11 +298,7 @@ class ClientOrderConfirmationPage extends StatelessWidget {
             color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 22,
-          ),
+          child: Icon(icon, color: color, size: 22),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -356,10 +411,11 @@ class ClientOrderConfirmationPage extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
             itemCount: order.orderdetails.length,
-            separatorBuilder: (_, __) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Divider(color: Colors.grey[200], height: 1),
-            ),
+            separatorBuilder:
+                (_, __) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Divider(color: Colors.grey[200], height: 1),
+                ),
             itemBuilder: (context, index) {
               return _buildProductItem(order.orderdetails[index]);
             },
@@ -393,14 +449,15 @@ class ClientOrderConfirmationPage extends StatelessWidget {
               placeholder: 'assets/img/no-image.png',
               image: detail.product.image1 ?? '',
               fit: BoxFit.cover,
-              imageErrorBuilder: (_, __, ___) => Container(
-                color: Colors.grey[100],
-                child: Icon(
-                  Icons.restaurant,
-                  color: Colors.grey[400],
-                  size: 28,
-                ),
-              ),
+              imageErrorBuilder:
+                  (_, __, ___) => Container(
+                    color: Colors.grey[100],
+                    child: Icon(
+                      Icons.restaurant,
+                      color: Colors.grey[400],
+                      size: 28,
+                    ),
+                  ),
             ),
           ),
         ),
@@ -455,10 +512,7 @@ class ClientOrderConfirmationPage extends StatelessWidget {
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Colors.orange[600]!,
-            Colors.orange[400]!,
-          ],
+          colors: [Colors.orange[600]!, Colors.orange[400]!],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -515,7 +569,7 @@ class ClientOrderConfirmationPage extends StatelessWidget {
     );
   }
 
-  /// 🌟 Bottom sheet con botón moderno tipo “Glass + Gradient Glow”
+  // Bottom sheet con botón moderno tipo "Glass + Gradient Glow"
   Widget _buildBottomSheet(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
@@ -568,7 +622,6 @@ class ClientOrderConfirmationPage extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Glow animado sutil (toque dinámico)
                 Positioned.fill(
                   child: AnimatedOpacity(
                     duration: const Duration(seconds: 2),

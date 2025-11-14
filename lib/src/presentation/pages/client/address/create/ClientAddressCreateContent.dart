@@ -6,7 +6,6 @@ import 'package:flutter_application_1/src/presentation/pages/client/address/crea
 import 'package:flutter_application_1/src/presentation/pages/client/address/create/bloc/ClientAddressCreateEvent.dart';
 import 'package:flutter_application_1/src/presentation/pages/client/address/create/bloc/ClientAddressCreateState.dart';
 import 'package:flutter_application_1/src/presentation/utils/BlocFormItem.dart';
-import 'package:flutter_application_1/src/presentation/widgets/DefaultTextField.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ClientAddressCreateContent extends StatefulWidget {
@@ -59,11 +58,7 @@ class _ClientAddressCreateContentState
             shape: BoxShape.circle,
           ),
           padding: const EdgeInsets.all(20),
-          child: Icon(
-            CupertinoIcons.location_solid,
-            color: primary,
-            size: 95,
-          ),
+          child: Icon(CupertinoIcons.location_solid, color: primary, size: 95),
         ),
         const SizedBox(height: 16),
         Text(
@@ -169,8 +164,9 @@ class _ClientAddressCreateContentState
       icon: CupertinoIcons.location_solid,
       label: 'Referencia o punto cercano',
       onChanged: (text) {
-        widget.bloc
-            ?.add(ReferenceChanged(reference: BlocFormItem(value: text)));
+        widget.bloc?.add(
+          ReferenceChanged(reference: BlocFormItem(value: text)),
+        );
       },
       validator: (value) {
         if (value == null || value.isEmpty) {

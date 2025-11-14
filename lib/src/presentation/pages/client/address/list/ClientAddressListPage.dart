@@ -59,7 +59,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
           builder: (context, state) {
             final responseState = state.response;
 
-            // 🔥 Mostrar loading solo cuando realmente está cargando
+            // Mostrar loading solo cuando realmente está cargando
             if (responseState is Loading) {
               return const Center(
                 child: SpinKitThreeBounce(
@@ -70,7 +70,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
               );
             }
 
-            // 🔥 Si hay un error real, mostrarlo
+            // Si hay un error real, mostrarlo
             if (responseState is Error) {
               return Center(
                 child: Padding(
@@ -78,11 +78,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 60,
-                      ),
+                      Icon(Icons.error_outline, color: Colors.red, size: 60),
                       const SizedBox(height: 16),
                       Text(
                         'Error al cargar direcciones',
@@ -117,14 +113,12 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
               );
             }
 
-            // 🔥 Si es Success, procesar las direcciones
+            // Si es Success, procesar las direcciones
             if (responseState is Success) {
               List<Address> addresses = responseState.data as List<Address>;
-              
               if (addresses.isNotEmpty) {
                 _bloc?.add(SetAddressSession(addressList: addresses));
               }
-
               // Si no hay direcciones, mostrar estado vacío
               if (addresses.isEmpty) {
                 return _buildEmptyState(context, isSelectionMode);
@@ -148,7 +142,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
                     ),
                   ),
 
-                  // 🟧 Botones tipo píldora (pill-shaped)
+                  // Botones tipo píldora (pill-shaped)
                   if (isSelectionMode)
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -157,7 +151,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
                       ),
                       child: Row(
                         children: [
-                          // 🔶 Botón Confirmar
+                          // Botón Confirmar
                           Expanded(
                             child: Container(
                               height: 50,
@@ -173,8 +167,9 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
                                 borderRadius: BorderRadius.circular(30),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppTheme.primaryColor
-                                        .withOpacity(0.35),
+                                    color: AppTheme.primaryColor.withOpacity(
+                                      0.35,
+                                    ),
                                     blurRadius: 10,
                                     offset: const Offset(0, 3),
                                   ),
@@ -225,7 +220,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
 
                           const SizedBox(width: 12),
 
-                          // ⬜️ Botón Agregar
+                          // Botón Agregar
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: () {
@@ -271,7 +266,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
               );
             }
 
-            // 🔥 Estado inicial (antes de cargar) - Mostrar estado vacío
+            // Estado inicial (antes de cargar) - Mostrar estado vacío
             return _buildEmptyState(context, isSelectionMode);
           },
         ),
@@ -279,7 +274,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
     );
   }
 
-  // 📭 Estado vacío elegante - MODIFICADO PARA SOPORTAR MODO SELECCIÓN
+  // Estado vacío elegante - MODIFICADO PARA SOPORTAR MODO SELECCIÓN
   Widget _buildEmptyState(BuildContext context, bool isSelectionMode) {
     return Column(
       children: [
@@ -322,7 +317,10 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
                       onPressed: () {
                         Navigator.pushNamed(context, 'client/address/create');
                       },
-                      icon: const Icon(Icons.add_location_alt_rounded, size: 20),
+                      icon: const Icon(
+                        Icons.add_location_alt_rounded,
+                        size: 20,
+                      ),
                       label: Text(
                         'Agregar dirección',
                         style: GoogleFonts.poppins(
@@ -333,8 +331,10 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryColor,
                         foregroundColor: Colors.white,
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 28,
+                          vertical: 14,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
@@ -346,20 +346,14 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
             ),
           ),
         ),
-        
-        // 🔥 BOTÓN DE AGREGAR EN MODO SELECCIÓN (cuando no hay direcciones)
+
+        // BOTÓN DE AGREGAR EN MODO SELECCIÓN (cuando no hay direcciones)
         if (isSelectionMode)
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 16,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: OutlinedButton.icon(
               onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  'client/address/create',
-                );
+                Navigator.pushNamed(context, 'client/address/create');
               },
               icon: Icon(
                 Icons.add_location_alt_rounded,
@@ -377,10 +371,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppTheme.primaryColor,
-                side: BorderSide(
-                  color: AppTheme.primaryColor,
-                  width: 1.5,
-                ),
+                side: BorderSide(color: AppTheme.primaryColor, width: 1.5),
                 backgroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
@@ -395,7 +386,7 @@ class _ClientAddressListPageState extends State<ClientAddressListPage> {
     );
   }
 
-  // 🧊 Botón flotante con efecto glass
+  // Botón flotante con efecto glass
   Widget _buildAddButton(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(40),

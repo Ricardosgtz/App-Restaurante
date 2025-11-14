@@ -16,7 +16,8 @@ class ProfileUpdateBloc extends Bloc<ProfileUpdateEvent, ProfileUpdateState> {
   AuthUseCases authUseCases;
   final formKey = GlobalKey<FormState>();
 
-  ProfileUpdateBloc(this.usersUseCases, this.authUseCases) : super(ProfileUpdateState()) {
+  ProfileUpdateBloc(this.usersUseCases, this.authUseCases)
+    : super(ProfileUpdateState()) {
     on<ProfileUpdateInitEvent>(_onInitEvent);
     on<ProfileUpdateNameChanged>(_onNameChanged);
     on<ProfileUpdateLastnameChanged>(_onLastnameChanged);

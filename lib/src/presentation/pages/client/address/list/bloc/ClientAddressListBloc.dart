@@ -29,7 +29,8 @@ class ClientAddressListBloc
     if (authResponse != null) {
       emit(state.copyWith(response: Loading()));
       Resource response = await addressUseCases.getUserAddress.run(
-        authResponse.cliente.id!, event.context,
+        authResponse.cliente.id!,
+        event.context,
       );
       emit(state.copyWith(response: response));
     }
@@ -42,7 +43,7 @@ class ClientAddressListBloc
     emit(
       state.copyWith(
         radioValue: event.radioValue,
-        addressSelected: event.address, // ✅ nuevo campo
+        addressSelected: event.address,
       ),
     );
 
@@ -59,7 +60,6 @@ class ClientAddressListBloc
         (address) => address.id == addressSession.id,
       );
       if (index != -1) {
-        // YA HEMOS SELECCIONADO UNA DIRECCION Y ESTA GUARDADA EN SESION
         emit(state.copyWith(radioValue: index));
       }
     }
@@ -70,7 +70,10 @@ class ClientAddressListBloc
     Emitter<ClientAddressListState> emit,
   ) async {
     emit(state.copyWith(response: Loading()));
-    Resource response = await addressUseCases.delete.run(event.id, event.context);
+    Resource response = await addressUseCases.delete.run(
+      event.id,
+      event.context,
+    );
     emit(state.copyWith(response: response));
     Address? addressSession = await addressUseCases.getAddressSession.run();
     if (addressSession != null) {

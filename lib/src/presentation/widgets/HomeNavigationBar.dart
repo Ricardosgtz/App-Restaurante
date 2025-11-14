@@ -71,8 +71,7 @@ class HomeNavigationBar extends StatelessWidget {
       }).toList(),
     );
   }
-
-  /// ✨ Estilo mejorado del badge
+  
   Widget _buildIconWithBadge(IconData icon, Color color, int count) {
     return Stack(
       clipBehavior: Clip.none,

@@ -13,7 +13,7 @@ class HomeFAB extends StatelessWidget {
         width: 70,
         height: 70,
         decoration: BoxDecoration(
-          color: AppTheme.primaryColor, // 🌟 color global
+          color: AppTheme.primaryColor,
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(

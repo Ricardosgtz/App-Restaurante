@@ -11,7 +11,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   const HomeAppBar({super.key, required this.title});
 
-  // 🔸 Diálogo moderno para confirmar logout
+  // Diálogo moderno para confirmar logout
   void _showLogoutDialog(BuildContext context, ClientHomeBloc bloc) {
     final primary = AppTheme.primaryColor;
 
@@ -31,7 +31,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 👤 Ícono circular naranja (más pequeño)
+                // Ícono circular naranja (más pequeño)
                 Container(
                   width: 80,
                   height: 80,
@@ -53,7 +53,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                   child: const Icon(
                     Icons.logout_rounded,
                     color: Colors.white,
-                    size: 32, // 👈 antes 40 → más compacto y elegante
+                    size: 32,
                   ),
                 ),
 
@@ -144,7 +144,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  // 🔸 Diálogo de carga elegante (ícono más pequeño)
+  // Diálogo de carga elegante (ícono más pequeño)
   void _showLoadingDialog(BuildContext context) {
     final primary = AppTheme.primaryColor;
 
@@ -200,7 +200,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                   child: const Icon(
                     Icons.logout_rounded,
                     color: Colors.white,
-                    size: 40, // 👈 antes 50 → más proporcionado
+                    size: 40,
                   ),
                 ),
 
@@ -240,7 +240,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                 const SizedBox(height: 26),
 
                 Text(
-                  "Hasta pronto 👋",
+                  "Hasta pronto",
                   style: GoogleFonts.poppins(
                     color: Colors.grey.shade700,
                     fontSize: 15.5,
